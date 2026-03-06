@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoFill Form</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <button id="fillFormBtn">Auto-Fill Form</button>
+    
+    <div id="quickFilesContainer" class="section-box">
+      <div class="file-row" id="row-resume">
+        <span class="file-label">Resume:</span>
+        <span id="resumeName" class="file-name" title="No file saved">None</span>
+        <label for="resumeInput" class="icon-btn" title="Quick update Resume">🔄</label>
+        <input type="file" id="resumeInput" accept=".pdf,.doc,.docx">
+      </div>
+      <div class="file-row" id="row-cover">
+        <span class="file-label">Cover:</span>
+        <span id="coverName" class="file-name" title="No file saved">None</span>
+        <label for="coverInput" class="icon-btn" title="Quick update Cover Letter">🔄</label>
+        <input type="file" id="coverInput" accept=".pdf,.doc,.docx">
+      </div>
+    </div>
+
+    <div id="specialFieldsContainer" class="section-box">
+      <div class="file-row" id="row-sf1">
+        <span class="file-label" title="Special Field 1">SF 1:</span>
+        <span id="sf1Name" class="file-name" title=""></span>
+        <span class="icon-btn copy-btn" data-target="specialField1" title="Copy to clipboard">📋</span>
+      </div>
+      <div class="file-row" id="row-sf2">
+        <span class="file-label" title="Special Field 2">SF 2:</span>
+        <span id="sf2Name" class="file-name" title=""></span>
+        <span class="icon-btn copy-btn" data-target="specialField2" title="Copy to clipboard">📋</span>
+      </div>
+      <div class="file-row" id="row-sf3">
+        <span class="file-label" title="Special Field 3">SF 3:</span>
+        <span id="sf3Name" class="file-name" title=""></span>
+        <span class="icon-btn copy-btn" data-target="specialField3" title="Copy to clipboard">📋</span>
+      </div>
+    </div>
+
+    <button id="optionsBtn">Edit Profile</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
