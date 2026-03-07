@@ -1,5 +1,0 @@
-[     599ms] TypeError: Cannot set properties of null (setting 'href')
-    at HTMLDocument.<anonymous> (https://www.gdcgroup.com/careers/job?gh_jid=4774482101:389:41)
-[    1751ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://my.greenhouse.io/users/self?job_post_id=4774482101:0
-[    1754ms] UnauthorizedError: Unauthorized: User is not logged in.
-    at Gs.fetchProfile (https://job-boards.cdn.greenhouse.io/assets/entry.client-wAxbj3od.js:61:71218)
