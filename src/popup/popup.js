@@ -119,10 +119,12 @@ document.getElementById('fillFormBtn').addEventListener('click', async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    if (!tab) return;
+    if (!tab || !tab.url) return;
 
-    // Prevent running on restricted pages
-    if (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:') || tab.url.startsWith('https://chrome.google.com/webstore')) {
+    const url = new URL(tab.url);
+
+    // Prevent running on restricted pages, but ALLOW chrome-extension://
+    if (url.protocol === 'chrome:' || url.protocol === 'edge:' || url.protocol === 'about:' || tab.url.startsWith('https://chrome.google.com/webstore')) {
       alert('JobForm AutoFill cannot run on browser settings pages or the web store. Please try it on a real job application page.');
       return;
     }
@@ -142,6 +144,6 @@ document.getElementById('fillFormBtn').addEventListener('click', async () => {
 
   } catch (error) {
     console.error("Failed to execute script: ", error);
-    alert("Could not run auto-fill on this page. If you just reloaded the extension, please refresh the page you are trying to fill.");
+    alert(`Could not run auto-fill: ${error.message}\n\nIf you just reloaded the extension, please refresh the target page.`);
   }
 });

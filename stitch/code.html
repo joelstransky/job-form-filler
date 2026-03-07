@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                        "matte-black": "#0a0a0a",
+                        "matte-card": "#121212",
+                    },
+                    fontFamily: {
+                        sans: ["Montserrat", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'neon-red': '0 0 10px rgba(239, 68, 68, 0.5)',
+                        'neon-green': '0 0 10px rgba(16, 185, 129, 0.5)',
+                        'neon-blue': '0 0 10px rgba(59, 130, 246, 0.5)',
+                        'neon-purple': '0 0 10px rgba(168, 85, 247, 0.5)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0a0a0a;
+        }
+        .glass-button-primary {
+            background: rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            color: #3b82f6;
+        }
+        .glass-button-primary:hover {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+            background: rgba(59, 130, 246, 0.2);
+        }
+        .glass-button-secondary {
+            background: rgba(239, 68, 68, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+        }
+        .glass-button-secondary:hover {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .input-base {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            outline: none;
+        }.input-red:hover, .input-red:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }.input-green:hover, .input-green:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }.input-blue:hover, .input-blue:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }.input-purple:hover, .input-purple:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
+<div class="max-w-6xl mx-auto bg-matte-card rounded-2xl shadow-2xl border border-gray-800 p-8 sm:p-10 lg:p-12">
+<h1 class="text-4xl font-bold mb-10 text-white tracking-wide">Profile Settings</h1>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12">
+<div class="space-y-12">
+<div>
+<h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Basic Info</h2>
+<div class="h-[2px] bg-red-500 mb-8 w-full"></div>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">First Name</label>
+<input class="input-base input-red" type="text" value="Joel"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Last Name</label>
+<input class="input-base input-red" type="text" value="Stransky"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+<input class="input-base input-red" type="email" value="stranskydesign@gmail.com"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Phone</label>
+<input class="input-base input-red" type="tel" value="915-474-2746"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Country</label>
+<input class="input-base input-red" type="text" value="USA"/>
+</div>
+</div>
+</div>
+<div>
+<h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Links</h2>
+<div class="h-[2px] bg-green-500 mb-8 w-full"></div>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">LinkedIn URL</label>
+<input class="input-base input-green" placeholder="https://linkedin.com/in/..." type="url"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">GitHub URL</label>
+<input class="input-base input-green" placeholder="https://github.com/..." type="url"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Portfolio URL</label>
+<input class="input-base input-green" placeholder="https://yourportfolio.com" type="url"/>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-12">
+<div>
+<h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Demographics / Equal Opportunity</h2>
+<div class="h-[2px] bg-blue-500 mb-8 w-full"></div>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Gender</label>
+<input class="input-base input-blue placeholder-gray-600" placeholder="e.g. Male, Female, Decline to self-identify" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Hispanic/Latino</label>
+<input class="input-base input-blue placeholder-gray-600" placeholder="e.g. Yes, No, Decline" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Veteran Status</label>
+<input class="input-base input-blue placeholder-gray-600" placeholder="e.g. I am not a protected veteran" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Disability Status</label>
+<input class="input-base input-blue placeholder-gray-600" placeholder="e.g. No, I don't have a disability" type="text"/>
+</div>
+</div>
+</div>
+<div>
+<h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Documents</h2>
+<div class="h-[2px] bg-purple-500 mb-8 w-full"></div>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Resume (PDF, DOCX)</label>
+<input class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer transition-colors" type="file"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Cover Letter (File)</label>
+<input class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer transition-colors" type="file"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-400 mb-2">Cover Letter / About Me (Text fallback)</label>
+<textarea class="input-base input-purple resize-none py-3" placeholder="Write something about yourself..." rows="5"></textarea>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-end gap-6">
+<button class="glass-button-secondary font-semibold py-3 px-8 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide">
+        Clear Data
+    </button>
+<button class="glass-button-primary font-semibold py-3 px-10 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide">
+        Save Profile
+    </button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Job Application Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body class="text-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
+  <div class="max-w-6xl mx-auto bg-matte-card rounded-2xl shadow-2xl border border-gray-800 p-8 sm:p-10 lg:p-12 relative">
+    
+    <div class="mb-10 border-b border-gray-800 pb-6 flex justify-between items-end">
+        <div>
+            <h1 class="text-4xl font-bold text-white tracking-wide">Test Job Application Form</h1>
+            <p class="text-gray-400 mt-2 flex items-center gap-4">
+              <span>Test the auto-fill engine directly:</span>
+              <button type="button" id="triggerAutoFill" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold transition-colors">
+                Run Auto-Fill Engine
+              </button>
+            </p>
+        </div>
+        <div class="bg-blue-500/10 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-lg text-sm font-medium">
+            Development Mode
+        </div>
+    </div>
+    
+    <form id="jobForm" onsubmit="event.preventDefault(); alert('Submitted successfully!');">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12">
+        
+        <!-- LEFT COLUMN -->
+        <div class="space-y-12">
+            <!-- Personal Info -->
+            <div>
+              <h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Personal Information</h2>
+              <div class="h-[2px] bg-red-500 mb-8 w-full"></div>
+              <div class="space-y-6">
+                  <div>
+                    <label for="fname" class="block text-sm font-medium text-gray-400 mb-2">First Name *</label>
+                    <input type="text" id="fname" name="fname" required class="input-base input-red">
+                  </div>
+                  <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-400 mb-2">Last Name *</label>
+                    <input type="text" id="last_name" name="surname" required class="input-base input-red">
+                  </div>
+                  <div>
+                    <label for="email_addr" class="block text-sm font-medium text-gray-400 mb-2">Email *</label>
+                    <input type="email" id="email_addr" name="contact_method_1" placeholder="Your best e-mail address" required class="input-base input-red">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Phone Number</label>
+                    <input type="tel" name="mobile" class="input-base input-red">
+                  </div>
+                  <div>
+                    <label for="country_select" class="block text-sm font-medium text-gray-400 mb-2">Country of Residence</label>
+                    <select id="country_select" name="country" class="input-base input-red">
+                      <option value="">-- Select --</option>
+                      <option value="US">United States</option>
+                      <option value="UK">United Kingdom</option>
+                      <option value="CA">Canada</option>
+                      <option value="AU">Australia</option>
+                      <option value="FR">France</option>
+                      <option value="DE">Germany</option>
+                    </select>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Links -->
+            <div>
+              <h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Links & Portfolio</h2>
+              <div class="h-[2px] bg-green-500 mb-8 w-full"></div>
+              <div class="space-y-6">
+                  <div>
+                    <label for="lnk" class="block text-sm font-medium text-gray-400 mb-2">LinkedIn Profile</label>
+                    <input type="text" id="lnk" name="linkedin_url" class="input-base input-green">
+                  </div>
+                  <div>
+                    <label for="gh" class="block text-sm font-medium text-gray-400 mb-2">GitHub Profile</label>
+                    <input type="url" id="gh" name="github_url" class="input-base input-green">
+                  </div>
+                  <div>
+                    <label for="port" class="block text-sm font-medium text-gray-400 mb-2">Personal Website</label>
+                    <input type="url" id="port" name="portfolio_url" class="input-base input-green">
+                  </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="space-y-12">
+            <!-- Demographics -->
+            <div>
+              <h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Demographics (Voluntary)</h2>
+              <div class="h-[2px] bg-blue-500 mb-8 w-full"></div>
+              <div class="space-y-6">
+                  <div>
+                    <label for="gender_id" class="block text-sm font-medium text-gray-400 mb-2">Gender</label>
+                    <select id="gender_id" name="gender" class="input-base input-blue">
+                      <option value="">-- Select --</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Decline">Decline to self-identify</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="hisp_ethnicity" class="block text-sm font-medium text-gray-400 mb-2">Are you Hispanic/Latino?</label>
+                    <input type="text" id="hisp_ethnicity" name="hispanic" placeholder="Yes / No" class="input-base input-blue">
+                  </div>
+                  <div>
+                    <label for="race_id" class="block text-sm font-medium text-gray-400 mb-2">Please identify your race</label>
+                    <select id="race_id" name="race" class="input-base input-blue">
+                      <option value="">-- Select --</option>
+                      <option value="White">White</option>
+                      <option value="Black">Black</option>
+                      <option value="Asian">Asian</option>
+                      <option value="Other">Other / Decline</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="vet_status" class="block text-sm font-medium text-gray-400 mb-2">Veteran Status</label>
+                    <select id="vet_status" name="veteran" class="input-base input-blue">
+                      <option value="">-- Select --</option>
+                      <option value="Protected Veteran">I am a protected veteran</option>
+                      <option value="Not a protected veteran">I am not a protected veteran</option>
+                      <option value="Decline">Decline to self-identify</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="disability_status" class="block text-sm font-medium text-gray-400 mb-2">Voluntary Self-Identification of Disability</label>
+                    <input type="text" id="disability_status" name="disability" class="input-base input-blue">
+                  </div>
+              </div>
+            </div>
+
+            <!-- Documents -->
+            <div>
+              <h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Documents & Extras</h2>
+              <div class="h-[2px] bg-purple-500 mb-8 w-full"></div>
+              <div class="space-y-6">
+                  <div>
+                    <label for="resume_upload" class="block text-sm font-medium text-gray-400 mb-2">Resume/CV (File Upload) *</label>
+                    <input type="file" id="resume_upload" name="resume" required class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer transition-colors">
+                  </div>
+                  <div>
+                    <label for="cover_upload" class="block text-sm font-medium text-gray-400 mb-2">Cover Letter (File Upload)</label>
+                    <input type="file" id="cover_upload" name="cover_letter" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer transition-colors">
+                  </div>
+                  <div>
+                    <label for="additional_info" class="block text-sm font-medium text-gray-400 mb-2">Message to Hiring Manager (Special Field 1)</label>
+                    <textarea id="additional_info" name="message" rows="4" class="input-base input-purple resize-none py-3"></textarea>
+                  </div>
+                  <div>
+                    <label for="ref_field" class="block text-sm font-medium text-gray-400 mb-2">Professional References (Special Field 2)</label>
+                    <textarea id="ref_field" name="references" rows="3" class="input-base input-purple resize-none py-3"></textarea>
+                  </div>
+                  <div>
+                    <label for="notes_field" class="block text-sm font-medium text-gray-400 mb-2">Additional Notes (Special Field 3)</label>
+                    <textarea id="notes_field" name="notes" rows="2" class="input-base input-purple resize-none py-3"></textarea>
+                  </div>
+                  
+                  <div class="mt-8 bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" name="gdpr_consent" required class="mt-1 bg-gray-800 border-gray-700 rounded text-blue-500 focus:ring-blue-500/50">
+                      <span class="text-sm text-gray-400 leading-relaxed">I consent to the processing and retention of my personal data for recruitment purposes in accordance with the GDPR requirements. *</span>
+                    </label>
+                  </div>
+              </div>
+            </div>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-gray-800 flex justify-end">
+        <button type="submit" class="glass-button-primary font-semibold py-3 px-10 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide">
+            Submit Application
+        </button>
+      </div>
+    </form>
+  </div>
+  <script src="test-form.js"></script>
+</body>
+</html>

@@ -1,147 +1,404 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JobForm AutoFill - Options</title>
-  <link rel="stylesheet" href="options.css">
-  <style>
-    h2 { margin-top: 1.5rem; font-size: 1.2rem; color: #444; border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; }
-    #clearBtn { background-color: #dc3545; margin-left: 10px; }
-    #clearBtn:hover { background-color: #c82333; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Profile Settings</h1>
-    <form id="profileForm">
-      <div class="grid">
-        <div class="column">
-          <h2>Basic Info</h2>
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName">
-          </div>
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName">
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email">
-          </div>
-          <div class="form-group">
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone">
-          </div>
-          <div class="form-group">
-            <label for="country">Country</label>
-            <select id="country">
-              <option value="">Select a country...</option>
-            </select>
-          </div>
+<!doctype html>
+<html class="dark" lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>JobForm AutoFill - Options</title>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="options.css" />
+    </head>
+    <body class="text-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
+        <div
+            class="max-w-6xl mx-auto bg-matte-card rounded-2xl shadow-2xl border border-gray-800 p-8 sm:p-10 lg:p-12 relative"
+        >
+            <div class="absolute top-8 right-8 flex gap-4 items-center">
+                <a
+                    href="test-form.html"
+                    target="_blank"
+                    class="text-gray-400 hover:text-white transition-colors text-sm underline underline-offset-4 decoration-gray-600 hover:decoration-white"
+                >
+                    Open Test Form ↗
+                </a>
+            </div>
 
-          <h2>Links</h2>
-          <div class="form-group">
-            <label for="linkedin">LinkedIn URL</label>
-            <input type="url" id="linkedin">
-          </div>
-          <div class="form-group">
-            <label for="github">GitHub URL</label>
-            <input type="url" id="github">
-          </div>
-          <div class="form-group">
-            <label for="portfolio">Portfolio URL</label>
-            <input type="url" id="portfolio">
-          </div>
+            <h1 class="text-4xl font-bold mb-10 text-white tracking-wide">
+                Profile Settings
+            </h1>
+
+            <form id="profileForm">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12">
+                    <div class="space-y-12">
+                        <!-- Basic Info -->
+                        <div>
+                            <h2
+                                class="text-xl font-semibold mb-2 text-white uppercase tracking-wider"
+                            >
+                                Basic Info
+                            </h2>
+                            <div class="h-[2px] bg-red-500 mb-8 w-full"></div>
+                            <div class="space-y-6">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="firstName"
+                                        >First Name</label
+                                    >
+                                    <input
+                                        class="input-base input-red"
+                                        type="text"
+                                        id="firstName"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="lastName"
+                                        >Last Name</label
+                                    >
+                                    <input
+                                        class="input-base input-red"
+                                        type="text"
+                                        id="lastName"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="email"
+                                        >Email</label
+                                    >
+                                    <input
+                                        class="input-base input-red"
+                                        type="email"
+                                        id="email"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="phone"
+                                        >Phone</label
+                                    >
+                                    <input
+                                        class="input-base input-red"
+                                        type="tel"
+                                        id="phone"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="country"
+                                        >Country</label
+                                    >
+                                    <select
+                                        class="input-base input-red"
+                                        id="country"
+                                    >
+                                        <option value="">
+                                            Select a country...
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Links -->
+                        <div>
+                            <h2
+                                class="text-xl font-semibold mb-2 text-white uppercase tracking-wider"
+                            >
+                                Links
+                            </h2>
+                            <div class="h-[2px] bg-green-500 mb-8 w-full"></div>
+                            <div class="space-y-6">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="linkedin"
+                                        >LinkedIn URL</label
+                                    >
+                                    <input
+                                        class="input-base input-green"
+                                        placeholder="https://linkedin.com/in/..."
+                                        type="url"
+                                        id="linkedin"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="github"
+                                        >GitHub URL</label
+                                    >
+                                    <input
+                                        class="input-base input-green"
+                                        placeholder="https://github.com/..."
+                                        type="url"
+                                        id="github"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="portfolio"
+                                        >Portfolio URL</label
+                                    >
+                                    <input
+                                        class="input-base input-green"
+                                        placeholder="https://yourportfolio.com"
+                                        type="url"
+                                        id="portfolio"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-12">
+                        <!-- Demographics -->
+                        <div>
+                            <h2
+                                class="text-xl font-semibold mb-2 text-white uppercase tracking-wider"
+                            >
+                                Demographics / Equal Opportunity
+                            </h2>
+                            <div class="h-[2px] bg-blue-500 mb-8 w-full"></div>
+                            <div class="space-y-6">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="gender"
+                                        >Gender</label
+                                    >
+                                    <select
+                                        class="input-base input-blue"
+                                        id="gender"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Non-binary">
+                                            Non-binary
+                                        </option>
+                                        <option value="Decline">
+                                            Decline to self-identify
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="hispanic"
+                                        >Hispanic/Latino</label
+                                    >
+                                    <select
+                                        class="input-base input-blue"
+                                        id="hispanic"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                        <option value="Decline">
+                                            Decline to self-identify
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="race"
+                                        >Race</label
+                                    >
+                                    <select
+                                        class="input-base input-blue"
+                                        id="race"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        <option value="White">
+                                            White (Not Hispanic or Latino)
+                                        </option>
+                                        <option value="Black">
+                                            Black or African American
+                                        </option>
+                                        <option value="Native Hawaiian">
+                                            Native Hawaiian or Other Pacific
+                                            Islander
+                                        </option>
+                                        <option value="Asian">Asian</option>
+                                        <option value="Native American">
+                                            American Indian or Alaska Native
+                                        </option>
+                                        <option value="Two or More">
+                                            Two or More Races
+                                        </option>
+                                        <option value="Decline">
+                                            Decline to self-identify
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="veteran"
+                                        >Veteran Status</label
+                                    >
+                                    <select
+                                        class="input-base input-blue"
+                                        id="veteran"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        <option value="Yes">
+                                            I identify as a protected veteran
+                                        </option>
+                                        <option value="No">
+                                            I am not a protected veteran
+                                        </option>
+                                        <option value="Decline">
+                                            I don't wish to answer
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="disability"
+                                        >Disability Status</label
+                                    >
+                                    <select
+                                        class="input-base input-blue"
+                                        id="disability"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        <option value="Yes">
+                                            Yes, I have a disability
+                                        </option>
+                                        <option value="No">
+                                            No, I don't have a disability
+                                        </option>
+                                        <option value="Decline">
+                                            I don't wish to answer
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents -->
+                        <div>
+                            <h2
+                                class="text-xl font-semibold mb-2 text-white uppercase tracking-wider"
+                            >
+                                Documents & Specials
+                            </h2>
+                            <div
+                                class="h-[2px] bg-purple-500 mb-8 w-full"
+                            ></div>
+                            <div class="space-y-6">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="resumeFile"
+                                        >Resume (PDF, DOCX)</label
+                                    >
+                                    <input
+                                        class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer transition-colors"
+                                        type="file"
+                                        id="resumeFile"
+                                        accept=".pdf,.doc,.docx"
+                                    />
+                                    <small
+                                        id="resumeStatus"
+                                        class="text-gray-500 block mt-1"
+                                    ></small>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="coverLetterFile"
+                                        >Cover Letter (File)</label
+                                    >
+                                    <input
+                                        class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer transition-colors"
+                                        type="file"
+                                        id="coverLetterFile"
+                                        accept=".pdf,.doc,.docx"
+                                    />
+                                    <small
+                                        id="coverLetterFileStatus"
+                                        class="text-gray-500 block mt-1"
+                                    ></small>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="specialField1"
+                                        >Special Field 1 (e.g. Cover Letter
+                                        Text)</label
+                                    >
+                                    <textarea
+                                        class="input-base input-purple resize-none py-3"
+                                        placeholder="Write something about yourself..."
+                                        rows="3"
+                                        id="specialField1"
+                                    ></textarea>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="specialField2"
+                                        >Special Field 2 (e.g.
+                                        References)</label
+                                    >
+                                    <textarea
+                                        class="input-base input-purple resize-none py-3"
+                                        placeholder="References..."
+                                        rows="3"
+                                        id="specialField2"
+                                    ></textarea>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-400 mb-2"
+                                        for="specialField3"
+                                        >Special Field 3 (e.g. Notes)</label
+                                    >
+                                    <textarea
+                                        class="input-base input-purple resize-none py-3"
+                                        placeholder="Additional Notes..."
+                                        rows="3"
+                                        id="specialField3"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-end items-center gap-6"
+                >
+                    <span
+                        id="status"
+                        class="status text-green-400 font-medium"
+                    ></span>
+                    <button
+                        type="button"
+                        id="clearBtn"
+                        class="glass-button-secondary font-semibold py-3 px-8 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide"
+                    >
+                        Clear Data
+                    </button>
+                    <button
+                        type="submit"
+                        id="saveBtn"
+                        class="glass-button-primary font-semibold py-3 px-10 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide"
+                    >
+                        Save Profile
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div class="column">
-          <h2>Demographics / Equal Opportunity</h2>
-          <div class="form-group">
-            <label for="gender">Gender</label>
-            <select id="gender">
-              <option value="">-- Select --</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Non-binary">Non-binary</option>
-              <option value="Decline">Decline to self-identify</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="hispanic">Are you Hispanic/Latino?</label>
-            <select id="hispanic">
-              <option value="">-- Select --</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-              <option value="Decline">Decline to self-identify</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="race">Race</label>
-            <select id="race">
-              <option value="">-- Select --</option>
-              <option value="White">White (Not Hispanic or Latino)</option>
-              <option value="Black">Black or African American</option>
-              <option value="Native Hawaiian">Native Hawaiian or Other Pacific Islander</option>
-              <option value="Asian">Asian</option>
-              <option value="Native American">American Indian or Alaska Native</option>
-              <option value="Two or More">Two or More Races</option>
-              <option value="Decline">Decline to self-identify</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="veteran">Veteran Status</label>
-            <select id="veteran">
-              <option value="">-- Select --</option>
-              <option value="Yes">I identify as one or more of the classifications of a protected veteran</option>
-              <option value="No">I am not a protected veteran</option>
-              <option value="Decline">I don't wish to answer</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="disability">Disability Status</label>
-            <select id="disability">
-              <option value="">-- Select --</option>
-              <option value="Yes">Yes, I have a disability (or previously had a disability)</option>
-              <option value="No">No, I don't have a disability</option>
-              <option value="Decline">I don't wish to answer</option>
-            </select>
-          </div>
-
-          <h2>Documents & Special Fields</h2>
-          <div class="form-group">
-            <label for="resumeFile">Resume (PDF, DOCX)</label>
-            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx">
-            <small id="resumeStatus" style="color: #666; display: block; margin-top: 4px;"></small>
-          </div>
-          <div class="form-group">
-            <label for="coverLetterFile">Cover Letter (File)</label>
-            <input type="file" id="coverLetterFile" accept=".pdf,.doc,.docx">
-            <small id="coverLetterFileStatus" style="color: #666; display: block; margin-top: 4px;"></small>
-          </div>
-          <div class="form-group">
-            <label for="specialField1">Special Field 1 (e.g., Cover Letter text)</label>
-            <textarea id="specialField1" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="specialField2">Special Field 2 (e.g., References)</label>
-            <textarea id="specialField2" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="specialField3">Special Field 3 (e.g., Notes)</label>
-            <textarea id="specialField3" rows="3"></textarea>
-          </div>
-        </div>
-      </div>
-      
-      <div class="actions" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
-        <button type="submit" id="saveBtn">Save Profile</button>
-        <button type="button" id="clearBtn">Clear Data</button>
-        <div id="status" class="status"></div>
-      </div>
-    </form>
-  </div>
-  <script src="options.js"></script>
-</body>
+        <script src="options.js"></script>
+    </body>
 </html>

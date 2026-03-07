@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: "Montserrat", sans-serif;
+    background-color: #0a0a0a;
+    color: #f3f4f6;
+  }
+}
+
+@layer components {
+  .glass-button-primary {
+    @apply font-semibold py-3 px-10 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide;
+    background: rgba(59, 130, 246, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid #3b82f6;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    color: #3b82f6;
+  }
+  .glass-button-primary:hover {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+    background: rgba(59, 130, 246, 0.2);
+  }
+
+  .glass-button-secondary {
+    @apply font-semibold py-3 px-8 rounded-lg transition-all duration-300 w-full sm:w-auto text-center tracking-wide;
+    background: rgba(239, 68, 68, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+  }
+  .glass-button-secondary:hover {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  .input-base {
+    @apply transition-all duration-300 w-full rounded-lg px-4 py-3 outline-none box-border text-matte-card font-sans border border-transparent bg-white;
+  }
+  .input-base::placeholder {
+    @apply text-gray-400;
+  }
+
+  .input-red:hover,
+  .input-red:focus {
+    @apply border-red-500 shadow-neon-red;
+  }
+  .input-green:hover,
+  .input-green:focus {
+    @apply border-emerald-500 shadow-neon-green;
+  }
+  .input-blue:hover,
+  .input-blue:focus {
+    @apply border-blue-500 shadow-neon-blue;
+  }
+  
+  .input-purple {
+    @apply bg-[#1e1e1e] border border-gray-800 text-white transition-all duration-300 w-full rounded-lg px-4 py-3 outline-none box-border font-sans;
+  }
+  .input-purple::placeholder {
+    @apply text-gray-500;
+  }
+  .input-purple:hover,
+  .input-purple:focus {
+    @apply border-purple-500 shadow-neon-purple;
+  }
+
+  select.input-base option {
+    @apply bg-white text-matte-card;
+  }
+}
