@@ -55,6 +55,8 @@
     }
 
     const fieldMatchers = [
+      { keys: ['authorized'], regex: /authorized.*work|legally.*authorized|right.*to.*work/i },
+      { keys: ['sponsorship'], regex: /sponsorship|require.*visa/i },
       { keys: ['firstName'], regex: /first.*name|fname|given.*name/i },
       { keys: ['lastName'], regex: /last.*name|lname|surname|family.*name/i },
       { keys: ['firstName', 'lastName'], regex: /name/i, combiner: (d) => `${d.firstName || ''} ${d.lastName || ''}`.trim() },
@@ -69,8 +71,6 @@
       { keys: ['race'], regex: /race/i },
       { keys: ['veteran'], regex: /veteran/i },
       { keys: ['disability'], regex: /disability/i },
-      { keys: ['authorized'], regex: /authorized.*work|legally.*authorized|right.*to.*work/i },
-      { keys: ['sponsorship'], regex: /sponsorship|require.*visa/i },
       { keys: ['specialField1'], regex: /cover.*letter|about.*me|message|additional.*info/i, isTextArea: true },
       { keys: ['specialField2'], regex: /references/i, isTextArea: true },
       { keys: ['specialField3'], regex: /notes/i, isTextArea: true },
