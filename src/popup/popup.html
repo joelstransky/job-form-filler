@@ -3,12 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoFill Form</title>
-  <link rel="stylesheet" href="popup.css">
+  <title>JobForm AutoFill</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../options/options.css">
+  <style>
+    .section-box { background: rgba(31, 41, 55, 0.5); border: 1px solid #1f2937; border-radius: 0.5rem; padding: 0.75rem; font-size: 0.75rem; }
+    .file-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .file-row:last-child { margin-bottom: 0; }
+    .file-label { color: #9ca3af; width: 45px; font-weight: 600; flex-shrink: 0; }
+    .file-name { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #f3f4f6; margin-right: 0.5rem; }
+    input[type="file"] { display: none; }
+    .icon-btn { cursor: pointer; font-size: 0.875rem; opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0; }
+    .icon-btn:hover { opacity: 1; }
+  </style>
 </head>
-<body>
-  <div class="container">
-    <button id="fillFormBtn">Auto-Fill Form</button>
+<body class="bg-[#0a0a0a] text-gray-100 p-3 font-sans w-[260px]">
+  <div class="flex flex-col gap-3">
+    
+    <div class="text-center pb-2 border-b border-gray-800">
+      <h1 class="text-lg font-bold text-white tracking-wide">JobForm AutoFill</h1>
+      <p class="text-xs text-blue-400 font-medium">Application Assistant</p>
+    </div>
+
+    <button id="fillFormBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded transition-colors text-base border border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+      Auto-Fill Form
+    </button>
     
     <div id="quickFilesContainer" class="section-box">
       <div class="file-row" id="row-resume">
@@ -43,7 +62,7 @@
       </div>
     </div>
 
-    <button id="optionsBtn">Edit Profile</button>
+    <button id="optionsBtn" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors bg-gray-900 border border-gray-800 hover:border-gray-600 rounded py-2 mt-1">Edit Profile</button>
   </div>
   <script src="popup.js"></script>
 </body>
