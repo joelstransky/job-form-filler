@@ -240,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'firstName', 'lastName', 'email', 'phone', 'country', 
         'linkedin', 'github', 'portfolio', 
         'gender', 'hispanic', 'race', 'veteran', 'disability', 
+        'authorized', 'sponsorship',
         'specialField1', 'specialField2', 'specialField3'
       ];
       
@@ -295,6 +296,8 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     race: document.getElementById('race').value,
     veteran: document.getElementById('veteran').value,
     disability: document.getElementById('disability').value,
+    authorized: document.getElementById('authorized').value,
+    sponsorship: document.getElementById('sponsorship').value,
     specialField1: document.getElementById('specialField1').value,
     specialField2: document.getElementById('specialField2').value,
     specialField3: document.getElementById('specialField3').value,

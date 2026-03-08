@@ -131,9 +131,24 @@
                     <label for="disability_status" class="block text-sm font-medium text-gray-400 mb-2">Voluntary Self-Identification of Disability</label>
                     <input type="text" id="disability_status" name="disability" class="input-base input-blue">
                   </div>
-              </div>
-            </div>
-
+                  <div class="md:col-span-2">
+                    <label for="auth_status" class="block text-sm font-medium text-gray-400 mb-2">Are you legally authorized to work in the country for which you are applying?</label>
+                    <select id="auth_status" name="authorized" class="input-base input-blue">
+                      <option value="">-- Select --</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                  <div class="md:col-span-2">
+                    <label for="sponsor_status" class="block text-sm font-medium text-gray-400 mb-2">Will you now or in the future require sponsorship for employment visa status (e.g., H-1B, etc.)?</label>
+                    <select id="sponsor_status" name="sponsorship" class="input-base input-blue">
+                      <option value="">-- Select --</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                  </div>
+                  </div>
             <!-- Documents -->
             <div>
               <h2 class="text-xl font-semibold mb-2 text-white uppercase tracking-wider">Documents & Extras</h2>

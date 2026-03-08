@@ -72,6 +72,8 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
         { keys: ['race'], regex: /race/i },
         { keys: ['veteran'], regex: /veteran/i },
         { keys: ['disability'], regex: /disability/i },
+        { keys: ['authorized'], regex: /authorized.*work|legally.*authorized|right.*to.*work/i },
+        { keys: ['sponsorship'], regex: /sponsorship|require.*visa/i },
         { keys: ['specialField1'], regex: /cover.*letter|about.*me|message|additional.*info/i, isTextArea: true },
         { keys: ['specialField2'], regex: /references/i, isTextArea: true },
         { keys: ['specialField3'], regex: /notes/i, isTextArea: true },
