@@ -160,35 +160,55 @@
                      filledCount++;
                   }
                } else {
-                  // Check if it's a react-select input (usually role="combobox" with specific aria attributes)
-                  const isReactSelect = input.getAttribute('role') === 'combobox' && input.id && input.id.startsWith('react-select') || input.id;
-                  
-                  if (isReactSelect && input.getAttribute('aria-autocomplete') === 'list') {
-                     // React-Select interaction simulation
-                     input.focus();
-                     
-                     // 1. Simulate typing the value
-                     setNativeValue(input, valueToSet);
-                     
-                     // 2. Give React a tiny moment to render the dropdown menu based on the typed value
-                     setTimeout(() => {
-                        // 3. Dispatch an 'Enter' keydown to select the currently highlighted (filtered) option
-                        const enterEvent = new KeyboardEvent('keydown', {
-                           bubbles: true, cancelable: true, keyCode: 13, key: 'Enter', code: 'Enter'
-                        });
-                        input.dispatchEvent(enterEvent);
-                        input.style.backgroundColor = '#e8f0fe';
-                     }, 150);
-                     
-                     filledCount++;
-                  } else {
-                     // Standard text inputs or other unknown dropdowns
-                     setNativeValue(input, valueToSet);
-                     input.style.backgroundColor = '#e8f0fe';
-                     filledCount++;
-                  }
-               }
-               break; 
+                const isReactSelect = input.getAttribute('role') === 'combobox' && (input.id && input.id.startsWith('react-select') || input.className.includes('select__input'));
+
+                if (isReactSelect && input.getAttribute('aria-autocomplete') === 'list') {
+
+                   // 1. Find the wrapper container and the toggle button
+                   const controlWrapper = input.closest('div[class*="control"]');
+                   const toggleButton = controlWrapper ? controlWrapper.querySelector('.select__indicators button, .select__indicators svg') : null;
+
+                   if (toggleButton || controlWrapper) {
+                      // 2. Click the dropdown to open it
+                      const targetToClick = toggleButton || controlWrapper;
+                      targetToClick.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+                      targetToClick.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+                      targetToClick.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+                      // 3. Give React time to render the portal/dropdown options
+                      setTimeout(() => {
+                         const allOptions = Array.from(document.querySelectorAll('[id*="-option-"], [class*="-option"]'));
+
+                         // Find exact match first, then partial match
+                         let matchingOption = allOptions.find(opt => 
+                             opt.textContent.trim().toLowerCase() === valueToSet.toLowerCase()
+                         );
+                         if (!matchingOption) {
+                             matchingOption = allOptions.find(opt => 
+                                 opt.textContent.toLowerCase().includes(valueToSet.toLowerCase())
+                             );
+                         }
+
+                         if (matchingOption) {
+                            // 4. Click the exact option element as recorded in Puppeteer
+                            matchingOption.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+                            matchingOption.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+                            matchingOption.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+                            if (controlWrapper) controlWrapper.style.backgroundColor = '#e8f0fe';
+                         } else {
+                            // Close dropdown if no match found
+                            document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+                         }
+                      }, 300);
+                   }
+                   filledCount++;
+                } else {
+                   setNativeValue(input, valueToSet);
+                   input.style.backgroundColor = '#e8f0fe';
+                   filledCount++;
+                }
+               }               break; 
              }
           }
         }

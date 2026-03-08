@@ -154,20 +154,50 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                        filledCount++;
                     }
                  } else {
-                    const isReactSelect = input.getAttribute('role') === 'combobox' && input.id && input.id.startsWith('react-select') || input.id;
-                    
+                    const isReactSelect = input.getAttribute('role') === 'combobox' && (input.id && input.id.startsWith('react-select') || input.className.includes('select__input'));
+
                     if (isReactSelect && input.getAttribute('aria-autocomplete') === 'list') {
+                       
+                       // 1. Focus the underlying input
                        input.focus();
-                       setNativeValue(input, valueToSet);
+                       
+                       // 2. We need to dispatch native React-compatible input events
+                       let prototype = Object.getPrototypeOf(input);
+                       let descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+                       while (!descriptor && prototype !== null) {
+                          prototype = Object.getPrototypeOf(prototype);
+                          if (prototype) descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+                       }
+                       if (descriptor && descriptor.set) {
+                          descriptor.set.call(input, valueToSet);
+                       } else {
+                          input.value = valueToSet;
+                       }
+                       
+                       input.dispatchEvent(new Event('input', { bubbles: true }));
+
+                       // 3. Give the component a tiny moment to filter its options internally
                        setTimeout(() => {
+                          // 4. Fire an 'Enter' keypress. react-select binds to keydown.
                           const enterEvent = new KeyboardEvent('keydown', {
-                             bubbles: true, cancelable: true, keyCode: 13, key: 'Enter', code: 'Enter'
+                             bubbles: true, 
+                             cancelable: true, 
+                             keyCode: 13, 
+                             key: 'Enter', 
+                             code: 'Enter'
                           });
                           input.dispatchEvent(enterEvent);
+                          
+                          // 5. Blur to finalize the visual state
+                          input.blur();
+                          const control = input.closest('div[class*="control"]');
+                          if (control) control.style.backgroundColor = '#e8f0fe';
                        }, 150);
+
                        filledCount++;
                     } else {
                        setNativeValue(input, valueToSet);
+                       input.style.backgroundColor = '#e8f0fe';
                        filledCount++;
                     }
                  }
