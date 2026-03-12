@@ -122,7 +122,7 @@
     ) {
       if (isFile && fileData) {
         await setFileValue(input, fileData);
-        input.style.backgroundColor = "#e8f0fe";
+
         return true;
       }
 
@@ -139,7 +139,7 @@
         if (matchingOption) {
           input.value = matchingOption.value;
           input.dispatchEvent(new Event("change", { bubbles: true }));
-          input.style.backgroundColor = "#e8f0fe";
+  
           return true;
         }
       }
@@ -213,8 +213,9 @@
                   view: window,
                 }),
               );
-              if (controlWrapper)
-                controlWrapper.style.backgroundColor = "#e8f0fe";
+              if (controlWrapper) {
+                // background color style removed
+              }
             } else {
               document.body.dispatchEvent(
                 new MouseEvent("mousedown", {
@@ -267,7 +268,7 @@
                   view: window,
                 }),
               );
-              matchingBtn.style.border = "2px solid #3b82f6";
+
               return true;
             }
           }
@@ -290,7 +291,7 @@
       // Handle Standard Inputs
       else {
         setNativeValue(input, valueToSet);
-        input.style.backgroundColor = "#e8f0fe";
+
         return true;
       }
       return false;
