@@ -3,6 +3,13 @@
   window.hasRunAutoFill = true;
 
   try {
+    // Fail gracefully if not in an extension context (e.g. testing)
+    if (!window.chrome || !window.chrome.storage || !window.chrome.storage.local) {
+        console.warn("JobForm AutoFill: chrome.storage is not available.");
+        window.hasRunAutoFill = false;
+        return;
+    }
+
     const result = await chrome.storage.local.get(['profileData']);
     let profileData = result.profileData;
     
