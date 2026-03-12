@@ -212,18 +212,22 @@
       let containerText = '';
       if (!labelText) {
           let container = input.parentElement;
-          for(let i=0; i<4; i++) {
-              if (container && (container.className.includes('field') || container.className.includes('container') || container.className.includes('group') || container.className.includes('Entry'))) {
-                  break;
+          for(let i=0; i<5; i++) {
+              if (container) {
+                  const cName = (container.className || '').toLowerCase();
+                  if (cName.includes('field') || cName.includes('group') || cName.includes('entry') || cName.includes('question')) {
+                      // Clone to avoid getting all text from child inputs
+                      const clone = container.cloneNode(true);
+                      const inputsToDel = clone.querySelectorAll('input, select, textarea, button');
+                      inputsToDel.forEach(el => el.remove());
+                      const text = clone.textContent.trim();
+                      if (text) {
+                          containerText = text;
+                          break;
+                      }
+                  }
+                  container = container.parentElement;
               }
-              if (container) container = container.parentElement;
-          }
-          if (container) {
-               // Clone to avoid getting all text from child inputs
-               const clone = container.cloneNode(true);
-               const inputsToDel = clone.querySelectorAll('input, select, textarea, button');
-               inputsToDel.forEach(el => el.remove());
-               containerText = clone.textContent;
           }
       }
 
