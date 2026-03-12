@@ -62,9 +62,9 @@
         const res = await fetch(fileData.data);
         const blob = await res.blob();
         // Preserves the exact original filename and lastModified date
-        const file = new File([blob], fileData.name, { 
+        const file = new File([blob], fileData.name, {
           type: fileData.type,
-          lastModified: fileData.lastModified || Date.now()
+          lastModified: fileData.lastModified || Date.now(),
         });
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
@@ -466,8 +466,10 @@
             .actions { display: flex; gap: 6px; margin-left: 10px; }
             .btn {
               background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
+              display: inline-flex; align-items: center; justify-content: center;
             }
-            .btn.copy { background: #10b981; }
+            .btn.copy { background: #10b981; font-size: calc(11px + 0.1em); }
+            .btn.fill svg { width: 14px; height: 14px; pointer-events: none; }
             .btn:hover { opacity: 0.8; }
             .btn:active { transform: scale(0.95); }
           </style>
@@ -529,7 +531,7 @@
             <div class="label" title="${val}"><strong>${field.label}:</strong> ${val}</div>
             <div class="actions">
               <button class="btn copy" title="Copy to clipboard">📋</button>
-              <button class="btn fill" title="Fill into field">⚡</button>
+              <button class="btn fill" title="Fill into field"><svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;filter: drop-shadow(-1px -1px 0px #A6A09B);" viewBox="0 0 20 20"><path d="M592.961 603.655 466.769 729.846H288.308c0-98.561 79.9-178.461 178.461-178.461a178.46 178.46 0 0 1 126.192 52.27" style="fill:#9bff58" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M645.231 729.846H466.769l126.192-126.191a178.46 178.46 0 0 1 52.27 126.191" style="fill:#3eddff" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M288.308 729.846h356.923c0 98.562-79.9 178.462-178.462 178.462s-178.461-79.9-178.461-178.462" style="fill:#f88" transform="translate(-16.155 -30.897)scale(.05603)"/></svg></button>
             </div>
           `;
 
@@ -594,8 +596,8 @@
         continue;
 
       const btnNode = document.createElement("div");
-      btnNode.style.display = 'inline-block';
-      const shadow = btnNode.attachShadow({mode: 'open'});
+      btnNode.style.display = "inline-block";
+      const shadow = btnNode.attachShadow({ mode: "open" });
       shadow.innerHTML = `
         <style>
           .btn {
@@ -609,7 +611,7 @@
           .btn svg { width: 100%; height: 100%; pointer-events: none; }
         </style>
         <div class="btn" title="JobForm AutoFill Override">
-          <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2" viewBox="0 0 20 20"><path d="M592.961 603.655 466.769 729.846H288.308c0-98.561 79.9-178.461 178.461-178.461a178.46 178.46 0 0 1 126.192 52.27" style="fill:#9bff58" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M645.231 729.846H466.769l126.192-126.191a178.46 178.46 0 0 1 52.27 126.191" style="fill:#3eddff" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M288.308 729.846h356.923c0 98.562-79.9 178.462-178.462 178.462s-178.461-79.9-178.461-178.462" style="fill:#f88" transform="translate(-16.155 -30.897)scale(.05603)"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;filter: drop-shadow(-1px -1px 0px #A6A09B);" viewBox="0 0 20 20"><path d="M592.961 603.655 466.769 729.846H288.308c0-98.561 79.9-178.461 178.461-178.461a178.46 178.46 0 0 1 126.192 52.27" style="fill:#9bff58" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M645.231 729.846H466.769l126.192-126.191a178.46 178.46 0 0 1 52.27 126.191" style="fill:#3eddff" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M288.308 729.846h356.923c0 98.562-79.9 178.462-178.462 178.462s-178.461-79.9-178.461-178.462" style="fill:#f88" transform="translate(-16.155 -30.897)scale(.05603)"/></svg>
         </div>
       `;
 
