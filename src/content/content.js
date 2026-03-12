@@ -208,8 +208,26 @@
       if (prevEl && (prevEl.tagName === 'LABEL' || prevEl.tagName === 'DIV' || prevEl.tagName === 'SPAN')) {
           siblingText = prevEl.textContent;
       }
+      
+      let containerText = '';
+      if (!labelText) {
+          let container = input.parentElement;
+          for(let i=0; i<4; i++) {
+              if (container && (container.className.includes('field') || container.className.includes('container') || container.className.includes('group') || container.className.includes('Entry'))) {
+                  break;
+              }
+              if (container) container = container.parentElement;
+          }
+          if (container) {
+               // Clone to avoid getting all text from child inputs
+               const clone = container.cloneNode(true);
+               const inputsToDel = clone.querySelectorAll('input, select, textarea, button');
+               inputsToDel.forEach(el => el.remove());
+               containerText = clone.textContent;
+          }
+      }
 
-      const combinedText = normalize(`${name} ${id} ${placeholder} ${ariaLabel} ${labelText} ${groupText} ${siblingText}`);
+      const combinedText = normalize(`${name} ${id} ${placeholder} ${ariaLabel} ${labelText} ${groupText} ${siblingText} ${containerText}`);
 
       // Greenhouse / Standard Consent Checkbox
       if (input.type === 'checkbox' && combinedText.includes('consent') && (combinedText.includes('process') || combinedText.includes('retention') || combinedText.includes('gdpr'))) {
