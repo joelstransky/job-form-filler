@@ -384,10 +384,10 @@
         
         if (spaceBelow < popupRect.height && anchorRect.top > popupRect.height) {
            // Show above
-           this.popupEl.style.top = \`\${anchorRect.top + window.scrollY - popupRect.height - 5}px\`;
+           this.popupEl.style.top = `${anchorRect.top + window.scrollY - popupRect.height - 5}px`;
         } else {
            // Show below
-           this.popupEl.style.top = \`\${anchorRect.bottom + window.scrollY + 5}px\`;
+           this.popupEl.style.top = `${anchorRect.bottom + window.scrollY + 5}px`;
         }
         
         // Prevent horizontal overflow
@@ -395,7 +395,7 @@
         if (leftPos + 320 > document.body.scrollWidth) {
           leftPos = document.body.scrollWidth - 330;
         }
-        this.popupEl.style.left = \`\${Math.max(10, leftPos)}px\`;
+        this.popupEl.style.left = `${Math.max(10, leftPos)}px`;
       }
 
       hide() {
@@ -408,7 +408,7 @@
       customElements.define('jobform-quick-btn', class extends HTMLElement {
         constructor() {
           super();
-          this.attachShadow({mode: 'closed'});
+          this.attachShadow({mode: 'open'});
           this.shadowRoot.innerHTML = `
             <style>
               .btn {
