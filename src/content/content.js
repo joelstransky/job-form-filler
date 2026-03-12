@@ -1,194 +1,325 @@
-(async function() {
+(async function () {
   if (window.hasRunAutoFill) return;
   window.hasRunAutoFill = true;
 
   try {
     // Fail gracefully if not in an extension context (e.g. testing)
-    if (!window.chrome || !window.chrome.storage || !window.chrome.storage.local) {
-        console.warn("JobForm AutoFill: chrome.storage is not available.");
-        window.hasRunAutoFill = false;
-        return;
+    if (
+      !window.chrome ||
+      !window.chrome.storage ||
+      !window.chrome.storage.local
+    ) {
+      console.warn("JobForm AutoFill: chrome.storage is not available.");
+      window.hasRunAutoFill = false;
+      return;
     }
 
-    const result = await chrome.storage.local.get(['profileData']);
+    const result = await chrome.storage.local.get(["profileData"]);
     let profileData = result.profileData;
-    
+
     if (!profileData) {
-      const syncResult = await chrome.storage.sync.get(['profileData']);
+      const syncResult = await chrome.storage.sync.get(["profileData"]);
       if (syncResult.profileData) profileData = syncResult.profileData;
     }
-    
+
     if (!profileData) {
       console.warn("JobForm AutoFill: No profile data found.");
       return;
     }
 
     // Helper to format text for better matching
-    const normalize = (str) => (str || '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').toLowerCase().trim();
+    const normalize = (str) =>
+      (str || "")
+        .replace(/[-_]/g, " ")
+        .replace(/\s+/g, " ")
+        .toLowerCase()
+        .trim();
 
     function setNativeValue(element, value) {
       let prototype = Object.getPrototypeOf(element);
-      let descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
-      
+      let descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+
       while (!descriptor && prototype !== null) {
         prototype = Object.getPrototypeOf(prototype);
-        if (prototype) descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+        if (prototype)
+          descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
       }
-      
+
       if (descriptor && descriptor.set) {
         descriptor.set.call(element, value);
       } else {
         element.value = value;
       }
-      
-      element.dispatchEvent(new Event('input', { bubbles: true }));
-      element.dispatchEvent(new Event('change', { bubbles: true }));
-      element.dispatchEvent(new Event('blur', { bubbles: true }));
+
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+      element.dispatchEvent(new Event("blur", { bubbles: true }));
     }
 
     async function setFileValue(element, fileData) {
       try {
+        console.log(`JobForm AutoFill: Attaching file "${fileData.name}"`);
         const res = await fetch(fileData.data);
         const blob = await res.blob();
-        // Preserves the exact original filename
-        const file = new File([blob], fileData.name, { type: fileData.type });
+        // Preserves the exact original filename and lastModified date
+        const file = new File([blob], fileData.name, { 
+          type: fileData.type,
+          lastModified: fileData.lastModified || Date.now()
+        });
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         element.files = dataTransfer.files;
-        element.dispatchEvent(new Event('change', { bubbles: true }));
+        element.dispatchEvent(new Event("change", { bubbles: true }));
       } catch (e) {
         console.error("JobForm AutoFill: Failed to set file", e);
       }
     }
 
     const fieldMatchers = [
-      { keys: ['authorized'], regex: /authorized.*work|legally.*authorized|right.*to.*work|eligible.*to.*work/i },
-      { keys: ['sponsorship'], regex: /sponsorship|require.*visa|sponsor/i },
-      { keys: ['firstName'], regex: /first.*name|fname|given.*name/i },
-      { keys: ['lastName'], regex: /last.*name|lname|surname|family.*name/i },
-      { keys: ['firstName', 'lastName'], regex: /\bname\b|full.*name/i, combiner: (d) => `${d.firstName || ''} ${d.lastName || ''}`.trim() },
-      { keys: ['email'], regex: /email|e-mail/i },
-      { keys: ['phone'], regex: /phone|tel|mobile|cell/i },
-      { keys: ['country'], regex: /country|location|residence/i },
-      { keys: ['timeZone'], regex: /time.*zone/i },
-      { keys: ['startDate'], regex: /start.*date|date.*available/i },
-      { keys: ['linkedin'], regex: /linkedin/i },
-      { keys: ['github'], regex: /github/i },
-      { keys: ['portfolio'], regex: /portfolio|website|url/i },
-      { keys: ['gender'], regex: /gender|sex/i },
-      { keys: ['hispanic'], regex: /hispanic|latino/i },
-      { keys: ['race'], regex: /race|ethnicity/i },
-      { keys: ['veteran'], regex: /veteran/i },
-      { keys: ['disability'], regex: /disability/i },
-      { keys: ['specialField1'], regex: /cover.*letter|about.*me|message|additional.*info/i, isTextArea: true },
-      { keys: ['specialField2'], regex: /references/i, isTextArea: true },
-      { keys: ['specialField3'], regex: /notes/i, isTextArea: true },
-      { keys: ['resumeFile'], regex: /resume|cv/i, isFile: true },
-      { keys: ['coverLetterFile'], regex: /cover.*letter/i, isFile: true }
+      {
+        keys: ["authorized"],
+        regex:
+          /authorized.*work|legally.*authorized|right.*to.*work|eligible.*to.*work/i,
+      },
+      { keys: ["sponsorship"], regex: /sponsorship|require.*visa|sponsor/i },
+      { keys: ["firstName"], regex: /first.*name|fname|given.*name/i },
+      { keys: ["lastName"], regex: /last.*name|lname|surname|family.*name/i },
+      {
+        keys: ["firstName", "lastName"],
+        regex: /\bname\b|full.*name/i,
+        combiner: (d) => `${d.firstName || ""} ${d.lastName || ""}`.trim(),
+      },
+      { keys: ["email"], regex: /email|e-mail/i },
+      { keys: ["phone"], regex: /phone|tel|mobile|cell/i },
+      { keys: ["country"], regex: /country|location|residence/i },
+      { keys: ["timeZone"], regex: /time.*zone/i },
+      { keys: ["startDate"], regex: /start.*date|date.*available/i },
+      { keys: ["linkedin"], regex: /linkedin/i },
+      { keys: ["github"], regex: /github/i },
+      { keys: ["portfolio"], regex: /portfolio|website|url/i },
+      { keys: ["gender"], regex: /gender|sex/i },
+      { keys: ["hispanic"], regex: /hispanic|latino/i },
+      { keys: ["race"], regex: /race|ethnicity/i },
+      { keys: ["veteran"], regex: /veteran/i },
+      { keys: ["disability"], regex: /disability/i },
+      {
+        keys: ["specialField1"],
+        regex: /cover.*letter|about.*me|message|additional.*info/i,
+        isTextArea: true,
+      },
+      { keys: ["specialField2"], regex: /references/i, isTextArea: true },
+      { keys: ["specialField3"], regex: /notes/i, isTextArea: true },
+      { keys: ["resumeFile"], regex: /resume|cv/i, isFile: true },
+      { keys: ["coverLetterFile"], regex: /cover.*letter/i, isFile: true },
     ];
 
     // Attempt to fill a specific input given a value
-    async function attemptFill(input, valueToSet, isFile = false, fileData = null) {
+    async function attemptFill(
+      input,
+      valueToSet,
+      isFile = false,
+      fileData = null,
+    ) {
       if (isFile && fileData) {
         await setFileValue(input, fileData);
-        input.style.backgroundColor = '#e8f0fe';
+        input.style.backgroundColor = "#e8f0fe";
         return true;
       }
 
       if (!valueToSet) return false;
 
       // Handle Select Native
-      if (input.tagName === 'SELECT') {
+      if (input.tagName === "SELECT") {
         const options = Array.from(input.options);
-        const matchingOption = options.find(opt => 
-           normalize(opt.text).includes(normalize(valueToSet)) || 
-           normalize(opt.value).includes(normalize(valueToSet))
+        const matchingOption = options.find(
+          (opt) =>
+            normalize(opt.text).includes(normalize(valueToSet)) ||
+            normalize(opt.value).includes(normalize(valueToSet)),
         );
         if (matchingOption) {
-           input.value = matchingOption.value;
-           input.dispatchEvent(new Event('change', { bubbles: true }));
-           input.style.backgroundColor = '#e8f0fe';
-           return true;
+          input.value = matchingOption.value;
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+          input.style.backgroundColor = "#e8f0fe";
+          return true;
         }
-      } 
+      }
       // Handle React Select Comboboxes
-      else if (input.getAttribute('role') === 'combobox' && (input.id?.startsWith('react-select') || input.className?.includes('select__input'))) {
+      else if (
+        input.getAttribute("role") === "combobox" &&
+        (input.id?.startsWith("react-select") ||
+          input.className?.includes("select__input"))
+      ) {
         const controlWrapper = input.closest('div[class*="control"]');
-        const toggleButton = controlWrapper ? controlWrapper.querySelector('.select__indicators button, .select__indicators svg') : null;
+        const toggleButton = controlWrapper
+          ? controlWrapper.querySelector(
+              ".select__indicators button, .select__indicators svg",
+            )
+          : null;
         if (toggleButton || controlWrapper) {
           const targetToClick = toggleButton || controlWrapper;
-          targetToClick.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-          targetToClick.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-          targetToClick.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+          targetToClick.dispatchEvent(
+            new MouseEvent("mousedown", {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            }),
+          );
+          targetToClick.dispatchEvent(
+            new MouseEvent("mouseup", {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            }),
+          );
+          targetToClick.dispatchEvent(
+            new MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            }),
+          );
 
           setTimeout(() => {
-             const allOptions = Array.from(document.querySelectorAll('[id*="-option-"], [class*="-option"]'));
-             let matchingOption = allOptions.find(opt => normalize(opt.textContent) === normalize(valueToSet));
-             if (!matchingOption) {
-                 matchingOption = allOptions.find(opt => normalize(opt.textContent).includes(normalize(valueToSet)));
-             }
-             if (matchingOption) {
-                matchingOption.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-                matchingOption.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-                matchingOption.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-                if (controlWrapper) controlWrapper.style.backgroundColor = '#e8f0fe';
-             } else {
-                document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-             }
+            const allOptions = Array.from(
+              document.querySelectorAll('[id*="-option-"], [class*="-option"]'),
+            );
+            let matchingOption = allOptions.find(
+              (opt) => normalize(opt.textContent) === normalize(valueToSet),
+            );
+            if (!matchingOption) {
+              matchingOption = allOptions.find((opt) =>
+                normalize(opt.textContent).includes(normalize(valueToSet)),
+              );
+            }
+            if (matchingOption) {
+              matchingOption.dispatchEvent(
+                new MouseEvent("mousedown", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+              matchingOption.dispatchEvent(
+                new MouseEvent("mouseup", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+              matchingOption.dispatchEvent(
+                new MouseEvent("click", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+              if (controlWrapper)
+                controlWrapper.style.backgroundColor = "#e8f0fe";
+            } else {
+              document.body.dispatchEvent(
+                new MouseEvent("mousedown", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+            }
           }, 300);
           return true;
         }
-      } 
+      }
       // Handle Custom Button Groups and Radio/Checkbox
-      else if (input.type === 'radio' || input.type === 'checkbox' || input.type === 'hidden' || input.tabIndex === -1) {
+      else if (
+        input.type === "radio" ||
+        input.type === "checkbox" ||
+        input.type === "hidden" ||
+        input.tabIndex === -1
+      ) {
         // Custom button groups (e.g., Ashby Yes/No)
         const container = input.parentElement;
         if (container) {
-          const buttons = Array.from(container.querySelectorAll('button'));
+          const buttons = Array.from(container.querySelectorAll("button"));
           if (buttons.length > 0) {
-            const matchingBtn = buttons.find(btn => normalize(btn.textContent) === normalize(valueToSet) || normalize(btn.textContent).includes(normalize(valueToSet)));
+            const matchingBtn = buttons.find(
+              (btn) =>
+                normalize(btn.textContent) === normalize(valueToSet) ||
+                normalize(btn.textContent).includes(normalize(valueToSet)),
+            );
             if (matchingBtn) {
-              matchingBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-              matchingBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-              matchingBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-              matchingBtn.style.border = '2px solid #3b82f6';
+              matchingBtn.dispatchEvent(
+                new MouseEvent("mousedown", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+              matchingBtn.dispatchEvent(
+                new MouseEvent("mouseup", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+              matchingBtn.dispatchEvent(
+                new MouseEvent("click", {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window,
+                }),
+              );
+              matchingBtn.style.border = "2px solid #3b82f6";
               return true;
             }
           }
         }
-        
-        if (input.type === 'radio' || input.type === 'checkbox') {
-          const labelText = normalize(input.closest('label')?.textContent || input.nextElementSibling?.textContent || input.parentElement?.textContent || '');
+
+        if (input.type === "radio" || input.type === "checkbox") {
+          const labelText = normalize(
+            input.closest("label")?.textContent ||
+              input.nextElementSibling?.textContent ||
+              input.parentElement?.textContent ||
+              "",
+          );
           if (labelText.includes(normalize(valueToSet))) {
             input.checked = true;
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
             return true;
           }
         }
       }
       // Handle Standard Inputs
       else {
-         setNativeValue(input, valueToSet);
-         input.style.backgroundColor = '#e8f0fe';
-         return true;
+        setNativeValue(input, valueToSet);
+        input.style.backgroundColor = "#e8f0fe";
+        return true;
       }
       return false;
     }
 
     // --- Automatic Pass ---
     let filledCount = 0;
-    const inputs = document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select');
-    
-    for (const input of inputs) {
-      if (input.type !== 'file' && input.type !== 'checkbox' && input.type !== 'radio' && input.value && input.value.trim() !== '') continue;
-      if (input.type === 'file' && input.files && input.files.length > 0) continue;
+    const inputs = document.querySelectorAll(
+      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select',
+    );
 
-      const name = input.name || '';
-      const id = input.id || '';
-      const placeholder = input.placeholder || '';
-      const ariaLabel = input.getAttribute('aria-label') || '';
-      
-      let labelText = '';
+    for (const input of inputs) {
+      if (
+        input.type !== "file" &&
+        input.type !== "checkbox" &&
+        input.type !== "radio" &&
+        input.value &&
+        input.value.trim() !== ""
+      )
+        continue;
+      if (input.type === "file" && input.files && input.files.length > 0)
+        continue;
+
+      const name = input.name || "";
+      const id = input.id || "";
+      const placeholder = input.placeholder || "";
+      const ariaLabel = input.getAttribute("aria-label") || "";
+
+      let labelText = "";
       if (id) {
         const label = document.querySelector(`label[for="${id}"]`);
         if (label) labelText = label.textContent;
@@ -198,89 +329,118 @@
         if (label) labelText = label.textContent;
       }
       if (!labelText) {
-        const parentLabel = input.closest('label');
+        const parentLabel = input.closest("label");
         if (parentLabel) labelText = parentLabel.textContent;
       }
 
       // Check fieldsets/legends for radio groups (aggressive matching)
-      let groupText = '';
-      const fieldset = input.closest('fieldset');
+      let groupText = "";
+      const fieldset = input.closest("fieldset");
       if (fieldset) {
-        const legend = fieldset.querySelector('legend');
+        const legend = fieldset.querySelector("legend");
         if (legend) groupText = legend.textContent;
       }
 
-      let siblingText = '';
+      let siblingText = "";
       const prevEl = input.previousElementSibling;
-      if (prevEl && (prevEl.tagName === 'LABEL' || prevEl.tagName === 'DIV' || prevEl.tagName === 'SPAN')) {
-          siblingText = prevEl.textContent;
-      }
-      
-      let containerText = '';
-      if (!labelText) {
-          let container = input.parentElement;
-          for(let i=0; i<5; i++) {
-              if (container) {
-                  const cName = (container.className || '').toLowerCase();
-                  if (cName.includes('field') || cName.includes('group') || cName.includes('entry') || cName.includes('question')) {
-                      // Clone to avoid getting all text from child inputs
-                      const clone = container.cloneNode(true);
-                      const inputsToDel = clone.querySelectorAll('input, select, textarea, button');
-                      inputsToDel.forEach(el => el.remove());
-                      const text = clone.textContent.trim();
-                      if (text) {
-                          containerText = text;
-                          break;
-                      }
-                  }
-                  container = container.parentElement;
-              }
-          }
+      if (
+        prevEl &&
+        (prevEl.tagName === "LABEL" ||
+          prevEl.tagName === "DIV" ||
+          prevEl.tagName === "SPAN")
+      ) {
+        siblingText = prevEl.textContent;
       }
 
-      const combinedText = normalize(`${name} ${id} ${placeholder} ${ariaLabel} ${labelText} ${groupText} ${siblingText} ${containerText}`);
+      let containerText = "";
+      if (!labelText) {
+        let container = input.parentElement;
+        for (let i = 0; i < 5; i++) {
+          if (container) {
+            const cName = (container.className || "").toLowerCase();
+            if (
+              cName.includes("field") ||
+              cName.includes("group") ||
+              cName.includes("entry") ||
+              cName.includes("question")
+            ) {
+              // Clone to avoid getting all text from child inputs
+              const clone = container.cloneNode(true);
+              const inputsToDel = clone.querySelectorAll(
+                "input, select, textarea, button",
+              );
+              inputsToDel.forEach((el) => el.remove());
+              const text = clone.textContent.trim();
+              if (text) {
+                containerText = text;
+                break;
+              }
+            }
+            container = container.parentElement;
+          }
+        }
+      }
+
+      const combinedText = normalize(
+        `${name} ${id} ${placeholder} ${ariaLabel} ${labelText} ${groupText} ${siblingText} ${containerText}`,
+      );
 
       // Greenhouse / Standard Consent Checkbox
-      if (input.type === 'checkbox' && combinedText.includes('consent') && (combinedText.includes('process') || combinedText.includes('retention') || combinedText.includes('gdpr'))) {
-         input.checked = true;
-         input.dispatchEvent(new Event('change', { bubbles: true }));
-         filledCount++;
-         continue;
+      if (
+        input.type === "checkbox" &&
+        combinedText.includes("consent") &&
+        (combinedText.includes("process") ||
+          combinedText.includes("retention") ||
+          combinedText.includes("gdpr"))
+      ) {
+        input.checked = true;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        filledCount++;
+        continue;
       }
 
       // Matcher checks
       for (const matcher of fieldMatchers) {
-        if (matcher.isTextArea && input.tagName !== 'TEXTAREA') continue;
-        if (matcher.isFile && input.type !== 'file') continue;
-        if (!matcher.isFile && input.type === 'file') continue;
+        if (matcher.isTextArea && input.tagName !== "TEXTAREA") continue;
+        if (matcher.isFile && input.type !== "file") continue;
+        if (!matcher.isFile && input.type === "file") continue;
 
         if (matcher.regex.test(combinedText)) {
           if (matcher.isFile) {
-             const fileData = profileData[matcher.keys[0]];
-             if (fileData && await attemptFill(input, null, true, fileData)) filledCount++;
-             break;
+            const fileData = profileData[matcher.keys[0]];
+            if (fileData && (await attemptFill(input, null, true, fileData)))
+              filledCount++;
+            break;
           } else {
-             let valueToSet = matcher.combiner ? matcher.combiner(profileData) : profileData[matcher.keys[0]];
-             // For radio buttons, we are looping through ALL radios. If the combined text matches the QUESTION (e.g. veteran), 
-             // attemptFill will check if the specific radio's label matches the ANSWER (profileData value).
-             if (valueToSet && typeof valueToSet === 'string' && valueToSet.trim() !== '') {
-               if (await attemptFill(input, valueToSet)) filledCount++;
-             }
-             break; 
+            let valueToSet = matcher.combiner
+              ? matcher.combiner(profileData)
+              : profileData[matcher.keys[0]];
+            // For radio buttons, we are looping through ALL radios. If the combined text matches the QUESTION (e.g. veteran),
+            // attemptFill will check if the specific radio's label matches the ANSWER (profileData value).
+            if (
+              valueToSet &&
+              typeof valueToSet === "string" &&
+              valueToSet.trim() !== ""
+            ) {
+              if (await attemptFill(input, valueToSet)) filledCount++;
+            }
+            break;
           }
         }
       }
     }
-    console.log(`JobForm AutoFill: Automatically filled ${filledCount} fields.`);
+    console.log(
+      `JobForm AutoFill: Automatically filled ${filledCount} fields.`,
+    );
 
     // --- Injected UI (Manual Override) ---
     class JobFormPopupManager {
       constructor() {
-        this.container = document.createElement('div');
-        this.container.id = 'jf-popup-manager-root';
+        this.container = document.createElement("div");
+        this.container.id = "jf-popup-manager-root";
         document.body.appendChild(this.container);
-        this.shadow = this.container.attachShadow({mode: 'closed'});
-        
+        this.shadow = this.container.attachShadow({ mode: "closed" });
+
         this.shadow.innerHTML = `
           <style>
             .popup {
@@ -291,6 +451,7 @@
               z-index: 2147483647; overflow-y: auto;
               font-family: system-ui, -apple-system, sans-serif; font-size: 13px;
               display: none; flex-direction: column;
+              padding: 6px 0px;
             }
             .popup.show { display: flex; }
             .header { padding: 10px; border-bottom: 1px solid #333; font-weight: bold; background: #252525; position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; }
@@ -318,50 +479,52 @@
             <div id="jf-content"></div>
           </div>
         `;
-        
-        this.popupEl = this.shadow.getElementById('jf-popup');
-        this.contentEl = this.shadow.getElementById('jf-content');
+
+        this.popupEl = this.shadow.getElementById("jf-popup");
+        this.contentEl = this.shadow.getElementById("jf-content");
         this.currentInput = null;
-        
-        this.shadow.getElementById('jf-close').addEventListener('click', () => this.hide());
-        document.addEventListener('click', (e) => {
+
+        this.shadow
+          .getElementById("jf-close")
+          .addEventListener("click", () => this.hide());
+        document.addEventListener("click", (e) => {
           if (!e.composedPath().includes(this.container)) this.hide();
         });
       }
 
       show(x, y, input, anchorRect) {
         this.currentInput = input;
-        this.contentEl.innerHTML = '';
-        
+        this.contentEl.innerHTML = "";
+
         const textFields = [
-          { key: 'firstName', label: 'First Name' },
-          { key: 'lastName', label: 'Last Name' },
-          { key: 'email', label: 'Email' },
-          { key: 'phone', label: 'Phone' },
-          { key: 'country', label: 'Country' },
-          { key: 'timeZone', label: 'Time Zone' },
-          { key: 'startDate', label: 'Start Date' },
-          { key: 'linkedin', label: 'LinkedIn' },
-          { key: 'github', label: 'GitHub' },
-          { key: 'portfolio', label: 'Portfolio' },
-          { key: 'gender', label: 'Gender' },
-          { key: 'hispanic', label: 'Hispanic/Latino' },
-          { key: 'race', label: 'Race' },
-          { key: 'veteran', label: 'Veteran Status' },
-          { key: 'disability', label: 'Disability' },
-          { key: 'authorized', label: 'Authorized' },
-          { key: 'sponsorship', label: 'Sponsorship' },
-          { key: 'specialField1', label: 'Custom 1' },
-          { key: 'specialField2', label: 'Custom 2' },
-          { key: 'specialField3', label: 'Custom 3' }
+          { key: "firstName", label: "First Name" },
+          { key: "lastName", label: "Last Name" },
+          { key: "email", label: "Email" },
+          { key: "phone", label: "Phone" },
+          { key: "country", label: "Country" },
+          { key: "timeZone", label: "Time Zone" },
+          { key: "startDate", label: "Start Date" },
+          { key: "linkedin", label: "LinkedIn" },
+          { key: "github", label: "GitHub" },
+          { key: "portfolio", label: "Portfolio" },
+          { key: "gender", label: "Gender" },
+          { key: "hispanic", label: "Hispanic/Latino" },
+          { key: "race", label: "Race" },
+          { key: "veteran", label: "Veteran Status" },
+          { key: "disability", label: "Disability" },
+          { key: "authorized", label: "Authorized" },
+          { key: "sponsorship", label: "Sponsorship" },
+          { key: "specialField1", label: "Custom 1" },
+          { key: "specialField2", label: "Custom 2" },
+          { key: "specialField3", label: "Custom 3" },
         ];
 
-        textFields.forEach(field => {
+        textFields.forEach((field) => {
           const val = profileData[field.key];
           if (!val) return;
-          
-          const row = document.createElement('div');
-          row.className = 'row';
+
+          const row = document.createElement("div");
+          row.className = "row";
           row.innerHTML = `
             <div class="label" title="${val}"><strong>${field.label}:</strong> ${val}</div>
             <div class="actions">
@@ -369,38 +532,41 @@
               <button class="btn fill" title="Fill into field">⚡</button>
             </div>
           `;
-          
-          row.querySelector('.copy').addEventListener('click', (e) => {
+
+          row.querySelector(".copy").addEventListener("click", (e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(val);
             const btn = e.target;
-            btn.textContent = '✓';
-            setTimeout(() => btn.textContent = '📋', 1500);
+            btn.textContent = "✓";
+            setTimeout(() => (btn.textContent = "📋"), 1500);
           });
-          
-          row.querySelector('.fill').addEventListener('click', async (e) => {
+
+          row.querySelector(".fill").addEventListener("click", async (e) => {
             e.stopPropagation();
             await attemptFill(this.currentInput, val);
             this.hide();
           });
-          
+
           this.contentEl.appendChild(row);
         });
 
-        this.popupEl.classList.add('show');
-        
+        this.popupEl.classList.add("show");
+
         // Smart positioning
         const popupRect = this.popupEl.getBoundingClientRect();
         const spaceBelow = window.innerHeight - anchorRect.bottom;
-        
-        if (spaceBelow < popupRect.height && anchorRect.top > popupRect.height) {
-           // Show above
-           this.popupEl.style.top = `${anchorRect.top + window.scrollY - popupRect.height - 5}px`;
+
+        if (
+          spaceBelow < popupRect.height &&
+          anchorRect.top > popupRect.height
+        ) {
+          // Show above
+          this.popupEl.style.top = `${anchorRect.top + window.scrollY - popupRect.height - 5}px`;
         } else {
-           // Show below
-           this.popupEl.style.top = `${anchorRect.bottom + window.scrollY + 5}px`;
+          // Show below
+          this.popupEl.style.top = `${anchorRect.bottom + window.scrollY + 5}px`;
         }
-        
+
         // Prevent horizontal overflow
         let leftPos = anchorRect.left + window.scrollX;
         if (leftPos + 320 > document.body.scrollWidth) {
@@ -410,7 +576,7 @@
       }
 
       hide() {
-        this.popupEl.classList.remove('show');
+        this.popupEl.classList.remove("show");
         this.currentInput = null;
       }
     }
@@ -420,45 +586,56 @@
     // Inject buttons
     for (const input of inputs) {
       // Don't inject on files or buttons
-      if (input.type === 'file' || input.type === 'hidden' || input.type === 'submit') continue;
+      if (
+        input.type === "file" ||
+        input.type === "hidden" ||
+        input.type === "submit"
+      )
+        continue;
 
-      const btnNode = document.createElement('div');
+      const btnNode = document.createElement("div");
       btnNode.style.display = 'inline-block';
       const shadow = btnNode.attachShadow({mode: 'open'});
       shadow.innerHTML = `
         <style>
           .btn {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 18px; height: 18px; background: #8b5cf6; color: white;
-            border-radius: 50%; cursor: pointer; font-size: 10px;
+            width: 20px; height: 20px; cursor: pointer;
             margin-right: 6px; vertical-align: middle;
-            box-shadow: 0 0 3px rgba(0,0,0,0.3); user-select: none;
-            transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.3);
+            user-select: none;
+            transition: transform 0.1s;
           }
-          .btn:hover { transform: scale(1.15); background: #7c3aed; }
+          .btn:hover { transform: scale(1.2); }
+          .btn svg { width: 100%; height: 100%; pointer-events: none; }
         </style>
-        <div class="btn" title="JobForm AutoFill Override">⚡</div>
+        <div class="btn" title="JobForm AutoFill Override">
+          <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2" viewBox="0 0 20 20"><path d="M592.961 603.655 466.769 729.846H288.308c0-98.561 79.9-178.461 178.461-178.461a178.46 178.46 0 0 1 126.192 52.27" style="fill:#9bff58" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M645.231 729.846H466.769l126.192-126.191a178.46 178.46 0 0 1 52.27 126.191" style="fill:#3eddff" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M288.308 729.846h356.923c0 98.562-79.9 178.462-178.462 178.462s-178.461-79.9-178.461-178.462" style="fill:#f88" transform="translate(-16.155 -30.897)scale(.05603)"/></svg>
+        </div>
       `;
-      
+
       // Inject before the label if it exists, otherwise before the input
       const id = input.id;
       let label = id ? document.querySelector(`label[for="${id}"]`) : null;
-      if (!label) label = input.closest('label');
+      if (!label) label = input.closest("label");
 
       let targetEl = label || input;
-      
+
       targetEl.parentNode.insertBefore(btnNode, targetEl);
-      
-      shadow.querySelector('.btn').addEventListener('click', (e) => {
+
+      shadow.querySelector(".btn").addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        popupManager.show(e.clientX, e.clientY, input, btnNode.getBoundingClientRect());
+        popupManager.show(
+          e.clientX,
+          e.clientY,
+          input,
+          btnNode.getBoundingClientRect(),
+        );
       });
     }
-
   } catch (error) {
     console.error("JobForm AutoFill Error:", error);
   } finally {
-     window.hasRunAutoFill = false; // Allow re-runs if triggered manually
+    window.hasRunAutoFill = false; // Allow re-runs if triggered manually
   }
 })();

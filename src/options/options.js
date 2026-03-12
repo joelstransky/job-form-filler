@@ -203,6 +203,7 @@ function toBase64(file) {
     reader.onload = () => resolve({
       name: file.name,
       type: file.type,
+      lastModified: file.lastModified,
       data: reader.result
     });
     reader.onerror = error => reject(error);
