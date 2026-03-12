@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = result.profileData;
       
       const textFields = [
-        'firstName', 'lastName', 'email', 'phone', 'country', 
+        'firstName', 'lastName', 'email', 'phone', 'country', 'timeZone', 'startDate', 
         'linkedin', 'github', 'portfolio', 
         'gender', 'hispanic', 'race', 'veteran', 'disability', 
         'authorized', 'sponsorship',
@@ -288,6 +288,8 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     email: document.getElementById('email').value,
     phone: document.getElementById('phone').value,
     country: document.getElementById('country').value,
+    timeZone: document.getElementById('timeZone').value,
+    startDate: document.getElementById('startDate').value,
     linkedin: document.getElementById('linkedin').value,
     github: document.getElementById('github').value,
     portfolio: document.getElementById('portfolio').value,
