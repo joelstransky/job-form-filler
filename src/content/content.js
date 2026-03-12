@@ -301,7 +301,7 @@
               padding: 8px 10px; border-bottom: 1px solid #333;
             }
             .row:hover { background: #2a2a2a; }
-            .label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ccc; }
+            .label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ccc; min-height: 18px; line-height: 18px; display: block; }
             .actions { display: flex; gap: 6px; margin-left: 10px; }
             .btn {
               background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
