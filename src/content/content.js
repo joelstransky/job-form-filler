@@ -415,29 +415,6 @@
       }
     }
 
-    if (!customElements.get('jobform-quick-btn')) {
-      customElements.define('jobform-quick-btn', class extends HTMLElement {
-        constructor() {
-          super();
-          this.attachShadow({mode: 'open'});
-          this.shadowRoot.innerHTML = `
-            <style>
-              .btn {
-                display: inline-flex; align-items: center; justify-content: center;
-                width: 18px; height: 18px; background: #8b5cf6; color: white;
-                border-radius: 50%; cursor: pointer; font-size: 10px;
-                margin-right: 6px; vertical-align: middle;
-                box-shadow: 0 0 3px rgba(0,0,0,0.3); user-select: none;
-                transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.3);
-              }
-              .btn:hover { transform: scale(1.15); background: #7c3aed; }
-            </style>
-            <div class="btn" title="JobForm AutoFill Override">⚡</div>
-          `;
-        }
-      });
-    }
-
     const popupManager = new JobFormPopupManager();
 
     // Inject buttons
@@ -445,7 +422,23 @@
       // Don't inject on files or buttons
       if (input.type === 'file' || input.type === 'hidden' || input.type === 'submit') continue;
 
-      const btnNode = document.createElement('jobform-quick-btn');
+      const btnNode = document.createElement('div');
+      btnNode.style.display = 'inline-block';
+      const shadow = btnNode.attachShadow({mode: 'open'});
+      shadow.innerHTML = `
+        <style>
+          .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; background: #8b5cf6; color: white;
+            border-radius: 50%; cursor: pointer; font-size: 10px;
+            margin-right: 6px; vertical-align: middle;
+            box-shadow: 0 0 3px rgba(0,0,0,0.3); user-select: none;
+            transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.3);
+          }
+          .btn:hover { transform: scale(1.15); background: #7c3aed; }
+        </style>
+        <div class="btn" title="JobForm AutoFill Override">⚡</div>
+      `;
       
       // Inject before the label if it exists, otherwise before the input
       const id = input.id;
@@ -456,7 +449,7 @@
       
       targetEl.parentNode.insertBefore(btnNode, targetEl);
       
-      btnNode.shadowRoot.querySelector('.btn').addEventListener('click', (e) => {
+      shadow.querySelector('.btn').addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         popupManager.show(e.clientX, e.clientY, input, btnNode.getBoundingClientRect());
