@@ -104,11 +104,10 @@
       { keys: ["disability"], regex: /disability/i },
       {
         keys: ["specialField1"],
-        regex: /cover.*letter|about.*me|message|additional.*info/i,
-        isTextArea: true,
+        regex: /cover.*letter|about.*me|message|additional.*info|project|why.*interested/i,
       },
-      { keys: ["specialField2"], regex: /references/i, isTextArea: true },
-      { keys: ["specialField3"], regex: /notes/i, isTextArea: true },
+      { keys: ["specialField2"], regex: /references|role|applying.*for/i },
+      { keys: ["specialField3"], regex: /notes/i },
       { keys: ["resumeFile"], regex: /resume|cv/i, isFile: true },
       { keys: ["coverLetterFile"], regex: /cover.*letter/i, isFile: true },
     ];
@@ -143,16 +142,16 @@
           return true;
         }
       }
-      // Handle React Select Comboboxes
+      // Handle React Select Comboboxes and other custom dropdowns
       else if (
-        input.getAttribute("role") === "combobox" &&
-        (input.id?.startsWith("react-select") ||
-          input.className?.includes("select__input"))
+        input.tagName === "DIV" ||
+        input.getAttribute("role") === "combobox" ||
+        (input.className && input.className.includes("select__input"))
       ) {
-        const controlWrapper = input.closest('div[class*="control"]');
+        const controlWrapper = input.closest('div[class*="control"]') || input;
         const toggleButton = controlWrapper
           ? controlWrapper.querySelector(
-              ".select__indicators button, .select__indicators svg",
+              ".select__indicators button, .select__indicators svg, svg[class*='Chevron'], svg[class*='chevron']",
             )
           : null;
         if (toggleButton || controlWrapper) {
@@ -181,7 +180,7 @@
 
           setTimeout(() => {
             const allOptions = Array.from(
-              document.querySelectorAll('[id*="-option-"], [class*="-option"]'),
+              document.querySelectorAll('[id*="-option-"], [class*="-option"], [role="option"], [role="menuitem"], .notion-selectable-hover-menu-item, [role="menu"] div[role="button"]'),
             );
             let matchingOption = allOptions.find(
               (opt) => normalize(opt.textContent) === normalize(valueToSet),
@@ -300,10 +299,24 @@
     // --- Automatic Pass ---
     let filledCount = 0;
     const inputs = document.querySelectorAll(
-      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select',
+      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select, div[role="combobox"], div[role="button"], div[class*="select"]',
     );
 
     for (const input of inputs) {
+      if (input.tagName === "DIV") {
+        const role = input.getAttribute("role");
+        const className = (input.className || "").toLowerCase();
+        const hasChevron = !!input.querySelector('svg[class*="Chevron"], svg[class*="chevron"], svg[class*="down"], svg[class*="Down"]');
+        if (
+          role !== "combobox" &&
+          !hasChevron &&
+          !className.includes("select") &&
+          input.getAttribute("data-testid") !== "property-value"
+        ) {
+          continue;
+        }
+      }
+
       if (
         input.type !== "file" &&
         input.type !== "checkbox" &&
@@ -320,6 +333,18 @@
       const placeholder = input.placeholder || "";
       const ariaLabel = input.getAttribute("aria-label") || "";
 
+      let ariaLabelledByText = "";
+      const ariaLabelledBy = input.getAttribute("aria-labelledby");
+      if (ariaLabelledBy) {
+        const ids = ariaLabelledBy.split(/\s+/);
+        for (const labelId of ids) {
+          const labelEl = document.getElementById(labelId);
+          if (labelEl) {
+             ariaLabelledByText += " " + labelEl.textContent;
+          }
+        }
+      }
+
       let labelText = "";
       if (id) {
         const label = document.querySelector(`label[for="${id}"]`);
@@ -332,6 +357,23 @@
       if (!labelText) {
         const parentLabel = input.closest("label");
         if (parentLabel) labelText = parentLabel.textContent;
+      }
+
+      if (!labelText) {
+        let current = input;
+        for (let i = 0; i < 3; i++) {
+          if (!current) break;
+          const prev = current.previousElementSibling;
+          if (prev && (prev.tagName.match(/^H[1-6]$/) || prev.tagName === 'LABEL' || prev.tagName === 'DIV')) {
+            // Check if this previous element looks like a label/heading
+            const text = prev.textContent.trim();
+            if (text && text.length < 100) { // arbitrary limit so we don't grab paragraphs
+              labelText = text;
+              break;
+            }
+          }
+          current = current.parentElement;
+        }
       }
 
       // Check fieldsets/legends for radio groups (aggressive matching)
@@ -382,9 +424,18 @@
         }
       }
 
-      const combinedText = normalize(
-        `${name} ${id} ${placeholder} ${ariaLabel} ${labelText} ${groupText} ${siblingText} ${containerText}`,
+      let combinedText = normalize(
+        `${name} ${id} ${placeholder} ${ariaLabel} ${ariaLabelledByText} ${labelText} ${groupText} ${siblingText} ${containerText}`,
       );
+
+      // Heuristic for global hidden file inputs (e.g. React Dropzone in Notion)
+      if (input.type === "file" && combinedText.trim() === "") {
+        const hasResumeText = /resume|cv/i.test(document.body.innerText);
+        const allFileInputs = document.querySelectorAll('input[type="file"]');
+        if (allFileInputs.length === 1 && hasResumeText) {
+          combinedText = "resume"; // force match
+        }
+      }
 
       // Greenhouse / Standard Consent Checkbox
       if (
@@ -402,7 +453,6 @@
 
       // Matcher checks
       for (const matcher of fieldMatchers) {
-        if (matcher.isTextArea && input.tagName !== "TEXTAREA") continue;
         if (matcher.isFile && input.type !== "file") continue;
         if (!matcher.isFile && input.type === "file") continue;
 
