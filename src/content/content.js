@@ -299,22 +299,22 @@
     // --- Automatic Pass ---
     let filledCount = 0;
     const rawInputs = document.querySelectorAll(
-      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select, div[role="combobox"], div[role="button"], div[class*="select"]',
+      'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select, div[role="combobox"], div[role="button"], div[class*="select__"], div[class*="-select-"], div[class="select"]',
     );
 
     const validInputs = Array.from(rawInputs).filter((input) => {
       if (input.tagName === "DIV") {
         const role = input.getAttribute("role");
         const className = (input.className || "").toLowerCase();
-        const hasChevron = !!input.querySelector(
-          'svg[class*="Chevron"], svg[class*="chevron"], svg[class*="down"], svg[class*="Down"]'
-        );
-        if (
-          role !== "combobox" &&
-          !hasChevron &&
-          !className.includes("select") &&
-          input.getAttribute("data-testid") !== "property-value"
-        ) {
+        
+        // Stricter heuristics for custom dropdown DIVs
+        const isLikelySelectClass = /\b(select__|-select-|select\b)/.test(className) && !className.includes("notion-selectable");
+        const isCombobox = role === "combobox";
+        const isTestIdProp = input.getAttribute("data-testid") === "property-value";
+        const hasListboxPopup = input.getAttribute("aria-haspopup") === "listbox" || input.getAttribute("aria-haspopup") === "menu";
+        
+        // Must explicitly act as a combobox or have a known select class
+        if (!isCombobox && !hasListboxPopup && !isLikelySelectClass && !isTestIdProp) {
           return false;
         }
       }
