@@ -298,24 +298,30 @@
 
     // --- Automatic Pass ---
     let filledCount = 0;
-    const inputs = document.querySelectorAll(
+    const rawInputs = document.querySelectorAll(
       'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select, div[role="combobox"], div[role="button"], div[class*="select"]',
     );
 
-    for (const input of inputs) {
+    const validInputs = Array.from(rawInputs).filter((input) => {
       if (input.tagName === "DIV") {
         const role = input.getAttribute("role");
         const className = (input.className || "").toLowerCase();
-        const hasChevron = !!input.querySelector('svg[class*="Chevron"], svg[class*="chevron"], svg[class*="down"], svg[class*="Down"]');
+        const hasChevron = !!input.querySelector(
+          'svg[class*="Chevron"], svg[class*="chevron"], svg[class*="down"], svg[class*="Down"]'
+        );
         if (
           role !== "combobox" &&
           !hasChevron &&
           !className.includes("select") &&
           input.getAttribute("data-testid") !== "property-value"
         ) {
-          continue;
+          return false;
         }
       }
+      return true;
+    });
+
+    for (const input of validInputs) {
 
       if (
         input.type !== "file" &&
@@ -637,7 +643,7 @@
     const popupManager = new JobFormPopupManager();
 
     // Inject buttons
-    for (const input of inputs) {
+    for (const input of validInputs) {
       // Don't inject on files or buttons
       if (
         input.type === "file" ||
