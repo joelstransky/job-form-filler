@@ -102,6 +102,9 @@
       { keys: ["race"], regex: /race|ethnicity/i },
       { keys: ["veteran"], regex: /veteran/i },
       { keys: ["disability"], regex: /disability/i },
+      { keys: ["school"], regex: /school|university|college|institution/i },
+      { keys: ["degree"], regex: /degree/i },
+      { keys: ["discipline"], regex: /discipline|major|field.*study/i },
       {
         keys: ["specialField1"],
         regex: /cover.*letter|about.*me|message|additional.*info|project|why.*interested/i,
