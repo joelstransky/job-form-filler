@@ -52,6 +52,10 @@
   .input-green:focus {
     @apply border-emerald-500 shadow-neon-green;
   }
+  .input-yellow:hover,
+  .input-yellow:focus {
+    @apply border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)];
+  }
   .input-blue:hover,
   .input-blue:focus {
     @apply border-blue-500 shadow-neon-blue;
