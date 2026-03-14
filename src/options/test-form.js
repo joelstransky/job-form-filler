@@ -193,13 +193,11 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                           // 5. Blur to finalize the visual state
                           input.blur();
                           const control = input.closest('div[class*="control"]');
-                          if (control) control.style.backgroundColor = '#e8f0fe';
                        }, 150);
 
                        filledCount++;
                     } else {
                        setNativeValue(input, valueToSet);
-                       input.style.backgroundColor = '#e8f0fe';
                        filledCount++;
                     }
                  }
