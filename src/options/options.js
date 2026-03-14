@@ -238,13 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = result.profileData;
       
       const textFields = [
-        'firstName', 'lastName', 'email', 'phone', 'country', 'timeZone', 'startDate', 
-        'linkedin', 'github', 'portfolio', 
-        'gender', 'hispanic', 'race', 'veteran', 'disability', 
+        'firstName', 'lastName', 'email', 'phone', 'country', 'timeZone', 'startDate',
+        'linkedin', 'github', 'portfolio',
+        'gender', 'hispanic', 'race', 'veteran', 'disability',
+        'school', 'degree', 'discipline',
         'authorized', 'sponsorship',
         'specialField1', 'specialField2', 'specialField3'
-      ];
-      
+      ];      
       textFields.forEach(field => {
         if (document.getElementById(field) && data[field]) {
           document.getElementById(field).value = data[field];
@@ -299,6 +299,9 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     race: document.getElementById('race').value,
     veteran: document.getElementById('veteran').value,
     disability: document.getElementById('disability').value,
+    school: document.getElementById('school').value,
+    degree: document.getElementById('degree').value,
+    discipline: document.getElementById('discipline').value,
     authorized: document.getElementById('authorized').value,
     sponsorship: document.getElementById('sponsorship').value,
     specialField1: document.getElementById('specialField1').value,
