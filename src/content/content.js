@@ -303,12 +303,43 @@
     );
 
     const validInputs = Array.from(rawInputs).filter((input) => {
+      // Exclude visibly hidden inputs (e.g. react-select inner inputs, honeypots, or file inputs with 0 opacity)
+      const style = window.getComputedStyle(input);
+      let isHidden = false;
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        style.opacity === "0" ||
+        input.className?.includes("visually-hidden") ||
+        input.className?.includes("select__input") // Often the hidden inner input of a custom combobox
+      ) {
+        isHidden = true;
+      }
+      
+      // Also check if immediate parent is hidden (e.g. iti__search-input in closed dropdown)
+      if (!isHidden && input.parentElement) {
+        const parentStyle = window.getComputedStyle(input.parentElement);
+        if (parentStyle.display === "none" || parentStyle.visibility === "hidden" || parentStyle.opacity === "0") {
+            isHidden = true;
+        }
+      }
+
+      if (isHidden) return false;
+
       if (input.tagName === "DIV") {
         const role = input.getAttribute("role");
         const className = (input.className || "").toLowerCase();
         
         // Stricter heuristics for custom dropdown DIVs
-        const isLikelySelectClass = /\b(select__|-select-|select\b)/.test(className) && !className.includes("notion-selectable");
+        const isLikelySelectClass = /\b(select\b|select__input|-select-)/.test(className) &&
+                                   !className.includes("notion-selectable") &&
+                                   !className.includes("select__container") &&
+                                   !className.includes("select__control") &&
+                                   !className.includes("select__value-container") &&
+                                   !className.includes("select__placeholder") &&
+                                   !className.includes("select__indicators") &&
+                                   !className.includes("select__menu");
+        
         const isCombobox = role === "combobox";
         const isTestIdProp = input.getAttribute("data-testid") === "property-value";
         const hasListboxPopup = input.getAttribute("aria-haspopup") === "listbox" || input.getAttribute("aria-haspopup") === "menu";
