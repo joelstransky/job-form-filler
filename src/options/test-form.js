@@ -149,10 +149,15 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                if (valueToSet && valueToSet.trim() !== '') {
                  if (input.tagName === 'SELECT') {
                     const options = Array.from(input.options);
-                    const matchingOption = options.find(opt => 
-                       opt.text.toLowerCase().includes(valueToSet.toLowerCase()) || 
-                       opt.value.toLowerCase().includes(valueToSet.toLowerCase())
-                    );
+                    const valLower = valueToSet.toLowerCase();
+                    let matchingOption = options.find(opt => opt.text.toLowerCase() === valLower || opt.value.toLowerCase() === valLower);
+                    if (!matchingOption) {
+                       matchingOption = options.find(opt => opt.text.toLowerCase().startsWith(valLower) || opt.value.toLowerCase().startsWith(valLower));
+                    }
+                    if (!matchingOption) {
+                       matchingOption = options.find(opt => opt.text.toLowerCase().includes(valLower) || opt.value.toLowerCase().includes(valLower));
+                    }
+                    
                     if (matchingOption) {
                        input.value = matchingOption.value;
                        input.dispatchEvent(new Event('change', { bubbles: true }));
