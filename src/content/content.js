@@ -133,13 +133,23 @@
       // Handle Select Native
       if (input.tagName === "SELECT") {
         const options = Array.from(input.options);
-        const matchingOption = options.find(
-          (opt) =>
-            normalize(opt.text).includes(normalize(valueToSet)) ||
-            normalize(opt.value).includes(normalize(valueToSet)),
+        const valLower = normalize(valueToSet);
+
+        let matchingOption = options.find(
+          (opt) => normalize(opt.text) === valLower || normalize(opt.value) === valLower,
         );
-        if (matchingOption) {
-          input.value = matchingOption.value;
+        if (!matchingOption) {
+          matchingOption = options.find(
+            (opt) => normalize(opt.text).startsWith(valLower) || normalize(opt.value).startsWith(valLower),
+          );
+        }
+        if (!matchingOption) {
+          matchingOption = options.find(
+            (opt) => normalize(opt.text).includes(valLower) || normalize(opt.value).includes(valLower),
+          );
+        }
+
+        if (matchingOption) {          input.value = matchingOption.value;
           input.dispatchEvent(new Event("change", { bubbles: true }));
   
           return true;
