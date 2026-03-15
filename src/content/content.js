@@ -190,6 +190,11 @@
             );
             if (!matchingOption) {
               matchingOption = allOptions.find((opt) =>
+                normalize(opt.textContent).startsWith(normalize(valueToSet)),
+              );
+            }
+            if (!matchingOption) {
+              matchingOption = allOptions.find((opt) =>
                 normalize(opt.textContent).includes(normalize(valueToSet)),
               );
             }
