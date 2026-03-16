@@ -143,11 +143,6 @@
             (opt) => normalize(opt.text).startsWith(valLower) || normalize(opt.value).startsWith(valLower),
           );
         }
-        if (!matchingOption) {
-          matchingOption = options.find(
-            (opt) => normalize(opt.text).includes(valLower) || normalize(opt.value).includes(valLower),
-          );
-        }
 
         if (matchingOption) {          input.value = matchingOption.value;
           input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -201,11 +196,6 @@
             if (!matchingOption) {
               matchingOption = allOptions.find((opt) =>
                 normalize(opt.textContent).startsWith(normalize(valueToSet)),
-              );
-            }
-            if (!matchingOption) {
-              matchingOption = allOptions.find((opt) =>
-                normalize(opt.textContent).includes(normalize(valueToSet)),
               );
             }
             if (matchingOption) {

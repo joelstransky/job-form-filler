@@ -154,12 +154,8 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                     if (!matchingOption) {
                        matchingOption = options.find(opt => opt.text.toLowerCase().startsWith(valLower) || opt.value.toLowerCase().startsWith(valLower));
                     }
-                    if (!matchingOption) {
-                       matchingOption = options.find(opt => opt.text.toLowerCase().includes(valLower) || opt.value.toLowerCase().includes(valLower));
-                    }
-                    
-                    if (matchingOption) {
-                       input.value = matchingOption.value;
+
+                    if (matchingOption) {                       input.value = matchingOption.value;
                        input.dispatchEvent(new Event('change', { bubbles: true }));
                        filledCount++;
                     }
