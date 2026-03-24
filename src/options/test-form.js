@@ -32,10 +32,42 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
           }
         }
         
-        if (descriptor && descriptor.set) {
-          descriptor.set.call(element, value);
-        } else {
-          element.value = value;
+        try {
+          if (descriptor && descriptor.set) {
+            descriptor.set.call(element, value);
+          } else {
+            element.value = value;
+          }
+        } catch (e) {
+          console.warn(`JobForm AutoFill: Failed to set value "${value}" on element. Trying fallback.`, e);
+          
+          // Fallback for year/month fields complaining about full date strings
+          if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+             try {
+                let extractedValue = value;
+                const idStr = (element.id || '').toLowerCase();
+                const nameStr = (element.name || '').toLowerCase();
+                const typeStr = (element.type || '').toLowerCase();
+                
+                const isMonthSelect = idStr.includes('month') || nameStr.includes('month');
+                const isYearSelect = idStr.includes('year') || nameStr.includes('year') || typeStr === 'number';
+                
+                if (isMonthSelect) {
+                   const monthStr = value.substring(5, 7);
+                   extractedValue = monthStr.startsWith('0') ? monthStr.substring(1) : monthStr; 
+                } else if (isYearSelect) {
+                   extractedValue = value.substring(0, 4);
+                }
+                
+                if (descriptor && descriptor.set) {
+                  descriptor.set.call(element, extractedValue);
+                } else {
+                  element.value = extractedValue;
+                }
+             } catch (err) {
+                console.warn("JobForm AutoFill: Date fallback also failed.", err);
+             }
+          }
         }
         
         element.dispatchEvent(new Event('input', { bubbles: true }));
@@ -64,8 +96,8 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
         { keys: ['lastName'], regex: /last.*name|lname|surname|family.*name/i },
         { keys: ['firstName', 'lastName'], regex: /name/i, combiner: (d) => `${d.firstName || ''} ${d.lastName || ''}`.trim() },
         { keys: ['email'], regex: /email|e-mail/i },
-        { keys: ['phone'], regex: /phone|tel|mobile|cell/i },
         { keys: ['country'], regex: /country|location|residence/i },
+        { keys: ['phone'], regex: /phone|tel|mobile|cell/i },
         { keys: ['linkedin'], regex: /linkedin/i },
         { keys: ['github'], regex: /github/i },
         { keys: ['portfolio'], regex: /portfolio|website/i },
@@ -155,7 +187,8 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                        matchingOption = options.find(opt => opt.text.toLowerCase().startsWith(valLower) || opt.value.toLowerCase().startsWith(valLower));
                     }
 
-                    if (matchingOption) {                       input.value = matchingOption.value;
+                    if (matchingOption) {                       
+                       input.value = matchingOption.value;
                        input.dispatchEvent(new Event('change', { bubbles: true }));
                        filledCount++;
                     }
@@ -183,22 +216,21 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                        input.dispatchEvent(new Event('input', { bubbles: true }));
 
                        // 3. Give the component a tiny moment to filter its options internally
-                       setTimeout(() => {
-                          // 4. Fire an 'Enter' keypress. react-select binds to keydown.
-                          const enterEvent = new KeyboardEvent('keydown', {
-                             bubbles: true, 
-                             cancelable: true, 
-                             keyCode: 13, 
-                             key: 'Enter', 
-                             code: 'Enter'
-                          });
-                          input.dispatchEvent(enterEvent);
-                          
-                          // 5. Blur to finalize the visual state
-                          input.blur();
-                          const control = input.closest('div[class*="control"]');
-                       }, 150);
+                       await new Promise(r => setTimeout(r, 150));
 
+                       // 4. Fire an 'Enter' keypress. react-select binds to keydown.
+                       const enterEvent = new KeyboardEvent('keydown', {
+                          bubbles: true, 
+                          cancelable: true, 
+                          keyCode: 13, 
+                          key: 'Enter', 
+                          code: 'Enter'
+                       });
+                       input.dispatchEvent(enterEvent);
+                       
+                       // 5. Blur to finalize the visual state
+                       input.blur();
+                       
                        filledCount++;
                     } else {
                        setNativeValue(input, valueToSet);
@@ -207,13 +239,14 @@ document.getElementById('triggerAutoFill').addEventListener('click', async () =>
                  }
                  break; 
                }
-            }
-          }
-        }
-      }
-      
-      console.log(`JobForm AutoFill: Filled ${filledCount} fields.`);
-      btn.textContent = 'Filled!';
+               }
+               }
+               }
+
+               await new Promise(r => setTimeout(r, 100));
+               }
+
+               console.log(`JobForm AutoFill: Filled ${filledCount} fields.`);      btn.textContent = 'Filled!';
       setTimeout(() => {
         btn.textContent = originalText;
       }, 2000);

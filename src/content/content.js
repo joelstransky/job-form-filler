@@ -1,6 +1,4 @@
 (async function () {
-  if (window.hasRunAutoFill) return;
-  window.hasRunAutoFill = true;
 
   try {
     // Fail gracefully if not in an extension context (e.g. testing)
@@ -10,7 +8,6 @@
       !window.chrome.storage.local
     ) {
       console.warn("JobForm AutoFill: chrome.storage is not available.");
-      window.hasRunAutoFill = false;
       return;
     }
 
@@ -45,10 +42,42 @@
           descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
       }
 
-      if (descriptor && descriptor.set) {
-        descriptor.set.call(element, value);
-      } else {
-        element.value = value;
+      try {
+        if (descriptor && descriptor.set) {
+          descriptor.set.call(element, value);
+        } else {
+          element.value = value;
+        }
+      } catch (e) {
+        console.warn(`JobForm AutoFill: Failed to set value "${value}" on element. Trying fallback.`, e);
+        
+        // Fallback for year/month fields complaining about full date strings
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+           try {
+              let extractedValue = value;
+              const idStr = (element.id || '').toLowerCase();
+              const nameStr = (element.name || '').toLowerCase();
+              const typeStr = (element.type || '').toLowerCase();
+              
+              const isMonthSelect = idStr.includes('month') || nameStr.includes('month');
+              const isYearSelect = idStr.includes('year') || nameStr.includes('year') || typeStr === 'number';
+              
+              if (isMonthSelect) {
+                 const monthStr = value.substring(5, 7);
+                 extractedValue = monthStr.startsWith('0') ? monthStr.substring(1) : monthStr; 
+              } else if (isYearSelect) {
+                 extractedValue = value.substring(0, 4);
+              }
+              
+              if (descriptor && descriptor.set) {
+                descriptor.set.call(element, extractedValue);
+              } else {
+                element.value = extractedValue;
+              }
+           } catch (err) {
+              console.warn("JobForm AutoFill: Date fallback also failed.", err);
+           }
+        }
       }
 
       element.dispatchEvent(new Event("input", { bubbles: true }));
@@ -90,8 +119,8 @@
         combiner: (d) => `${d.firstName || ""} ${d.lastName || ""}`.trim(),
       },
       { keys: ["email"], regex: /email|e-mail/i },
+      { keys: ["country"], regex: /country|location|residence/i, combiner: (d) => ({ isCountry: true, name: d.country, code: d.countryCode, dialCode: d.countryDialCode }) },
       { keys: ["phone"], regex: /phone|tel|mobile|cell/i },
-      { keys: ["country"], regex: /country|location|residence/i },
       { keys: ["timeZone"], regex: /time.*zone/i },
       { keys: ["startDate"], regex: /start.*date|date.*available/i },
       { keys: ["linkedin"], regex: /linkedin/i },
@@ -124,116 +153,155 @@
     ) {
       if (isFile && fileData) {
         await setFileValue(input, fileData);
-
         return true;
       }
 
       if (!valueToSet) return false;
 
+      let isCountry = false;
+      let countryName = "";
+      let countryCode = "";
+      let countryDialCode = "";
+
+      if (typeof valueToSet === "object" && valueToSet.isCountry) {
+        isCountry = true;
+        countryName = valueToSet.name;
+        countryCode = valueToSet.code;
+        countryDialCode = valueToSet.dialCode;
+        valueToSet = countryName; // Default fallback for normalized strings in other handlers
+      }
+
+      const valLower = normalize(valueToSet);
+
       // Handle Select Native
       if (input.tagName === "SELECT") {
         const options = Array.from(input.options);
-        const valLower = normalize(valueToSet);
+        
+        let matchingOption = null;
+        if (isCountry) {
+          // 1. Exact match name or value
+          matchingOption = options.find((opt) => normalize(opt.text) === valLower || normalize(opt.value) === valLower);
+          
+          // 2. Contains name (e.g. "United States (+1)")
+          if (!matchingOption) {
+            matchingOption = options.find((opt) => normalize(opt.text).includes(valLower));
+          }
 
-        let matchingOption = options.find(
-          (opt) => normalize(opt.text) === valLower || normalize(opt.value) === valLower,
-        );
-        if (!matchingOption) {
+          // 3. Dial Code (for phone country selectors)
+          if (!matchingOption && countryDialCode) {
+            matchingOption = options.find((opt) => opt.text.includes(countryDialCode) || opt.value.includes(countryDialCode));
+          }
+          
+          // 4. ISO Code (e.g. "US")
+          if (!matchingOption && countryCode) {
+            matchingOption = options.find((opt) => normalize(opt.text) === normalize(countryCode) || normalize(opt.value) === normalize(countryCode));
+          }
+        } else {
           matchingOption = options.find(
-            (opt) => normalize(opt.text).startsWith(valLower) || normalize(opt.value).startsWith(valLower),
+            (opt) => normalize(opt.text) === valLower || normalize(opt.value) === valLower,
           );
+          if (!matchingOption) {
+            matchingOption = options.find(
+              (opt) => normalize(opt.text).startsWith(valLower) || normalize(opt.value).startsWith(valLower),
+            );
+          }
         }
 
-        if (matchingOption) {          input.value = matchingOption.value;
+        if (matchingOption) {
+          input.value = matchingOption.value;
           input.dispatchEvent(new Event("change", { bubbles: true }));
-  
+          input.dispatchEvent(new Event("input", { bubbles: true }));
           return true;
         }
+        return false;
       }
+      
       // Handle React Select Comboboxes and other custom dropdowns
       else if (
         input.tagName === "DIV" ||
         input.getAttribute("role") === "combobox" ||
-        (input.className && input.className.includes("select__input"))
+        (input.className && input.className.includes("select__input")) ||
+        input.getAttribute("aria-haspopup") === "listbox"
       ) {
-        const controlWrapper = input.closest('div[class*="control"]') || input;
-        const toggleButton = controlWrapper
-          ? controlWrapper.querySelector(
-              ".select__indicators button, .select__indicators svg, svg[class*='Chevron'], svg[class*='chevron']",
-            )
-          : null;
-        if (toggleButton || controlWrapper) {
-          const targetToClick = toggleButton || controlWrapper;
-          targetToClick.dispatchEvent(
-            new MouseEvent("mousedown", {
-              bubbles: true,
-              cancelable: true,
-              view: window,
-            }),
-          );
-          targetToClick.dispatchEvent(
-            new MouseEvent("mouseup", {
-              bubbles: true,
-              cancelable: true,
-              view: window,
-            }),
-          );
-          targetToClick.dispatchEvent(
-            new MouseEvent("click", {
-              bubbles: true,
-              cancelable: true,
-              view: window,
-            }),
-          );
+        // Try to find the actual clickable element
+        const controlWrapper = input.closest('div[class*="control"]') || 
+                             input.closest('div[class*="container"]') || 
+                             input;
+        
+        const toggleButton = controlWrapper.querySelector(
+          ".select__indicators button, .select__indicators svg, svg[class*='Chevron'], svg[class*='chevron'], .iti__arrow, .selected-flag, [class*='arrow'], [class*='indicator']"
+        );
 
-          setTimeout(() => {
-            const allOptions = Array.from(
-              document.querySelectorAll('[id*="-option-"], [class*="-option"], [role="option"], [role="menuitem"], .notion-selectable-hover-menu-item, [role="menu"] div[role="button"]'),
+        const targetToClick = toggleButton || controlWrapper || input;
+        
+        // Trigger opening
+        ["mousedown", "mouseup", "click"].forEach(type => {
+          targetToClick.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+        });
+
+        // Small synchronous delay to let the menu render
+        await new Promise(r => setTimeout(r, 400));
+
+        const allOptions = Array.from(
+          document.querySelectorAll(
+            '[id*="-option-"], [class*="-option"], [role="option"], [role="menuitem"], .notion-selectable-hover-menu-item, [role="menu"] div[role="button"], .iti__country, .country-list li, li.country'
+          )
+        ).filter(el => {
+          const style = window.getComputedStyle(el);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+
+        let matchingOption = null;
+        if (isCountry) {
+          // 1. Exact match ISO Code (Most reliable if data-country-code exists)
+          if (countryCode) {
+            matchingOption = allOptions.find((opt) =>
+              opt.getAttribute('data-country-code') === countryCode.toLowerCase()
             );
-            let matchingOption = allOptions.find(
-              (opt) => normalize(opt.textContent) === normalize(valueToSet),
-            );
-            if (!matchingOption) {
-              matchingOption = allOptions.find((opt) =>
-                normalize(opt.textContent).startsWith(normalize(valueToSet)),
-              );
-            }
-            if (matchingOption) {
-              matchingOption.dispatchEvent(
-                new MouseEvent("mousedown", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-              matchingOption.dispatchEvent(
-                new MouseEvent("mouseup", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-              matchingOption.dispatchEvent(
-                new MouseEvent("click", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-              if (controlWrapper) {
-                // background color style removed
-              }
-            } else {
-              document.body.dispatchEvent(
-                new MouseEvent("mousedown", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-            }
-          }, 300);
+          }
+
+          // 2. Exact match Name
+          if (!matchingOption) {
+            matchingOption = allOptions.find((opt) => normalize(opt.textContent) === valLower);
+          }
+
+          // 3. Includes Name (e.g., "United States (+1)")
+          if (!matchingOption) {
+            matchingOption = allOptions.find((opt) => normalize(opt.textContent).includes(valLower));
+          }
+
+          // 4. Dial Code (Fallback, risky because multiple countries share +1)
+          if (!matchingOption && countryDialCode) {
+            matchingOption = allOptions.find((opt) => {
+              const text = opt.textContent;
+              const dial = opt.getAttribute('data-dial-code');
+              return dial === countryDialCode.replace('+', '') || text.includes(countryDialCode);
+            });
+          }
+        } else {
+          matchingOption = allOptions.find((opt) => normalize(opt.textContent) === valLower);
+          if (!matchingOption) {
+            matchingOption = allOptions.find((opt) => normalize(opt.textContent).startsWith(valLower));
+          }
+        }
+
+        if (matchingOption) {
+          ["mousedown", "mouseup", "click"].forEach(type => {
+            matchingOption.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+          });
+          
+          // Force a blur/change on the underlying input if we can find it
+          const innerInput = input.querySelector('input') || (input.tagName === 'INPUT' ? input : null);
+          if (innerInput) {
+             innerInput.dispatchEvent(new Event('change', { bubbles: true }));
+             innerInput.dispatchEvent(new Event('blur', { bubbles: true }));
+          }
+          
           return true;
+        } else {
+          // Close menu if no match found
+          document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+          return false;
         }
       }
       // Handle Custom Button Groups and Radio/Checkbox
@@ -250,32 +318,13 @@
           if (buttons.length > 0) {
             const matchingBtn = buttons.find(
               (btn) =>
-                normalize(btn.textContent) === normalize(valueToSet) ||
-                normalize(btn.textContent).includes(normalize(valueToSet)),
+                normalize(btn.textContent) === valLower ||
+                normalize(btn.textContent).includes(valLower),
             );
             if (matchingBtn) {
-              matchingBtn.dispatchEvent(
-                new MouseEvent("mousedown", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-              matchingBtn.dispatchEvent(
-                new MouseEvent("mouseup", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-              matchingBtn.dispatchEvent(
-                new MouseEvent("click", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                }),
-              );
-
+              ["mousedown", "mouseup", "click"].forEach(type => {
+                matchingBtn.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+              });
               return true;
             }
           }
@@ -288,9 +337,10 @@
               input.parentElement?.textContent ||
               "",
           );
-          if (labelText.includes(normalize(valueToSet))) {
+          if (labelText.includes(valLower)) {
             input.checked = true;
             input.dispatchEvent(new Event("change", { bubbles: true }));
+            input.dispatchEvent(new Event("input", { bubbles: true }));
             return true;
           }
         }
@@ -298,7 +348,6 @@
       // Handle Standard Inputs
       else {
         setNativeValue(input, valueToSet);
-
         return true;
       }
       return false;
@@ -504,8 +553,10 @@
         if (matcher.regex.test(combinedText)) {
           if (matcher.isFile) {
             const fileData = profileData[matcher.keys[0]];
-            if (fileData && (await attemptFill(input, null, true, fileData)))
+            if (fileData) {
+              await attemptFill(input, null, true, fileData);
               filledCount++;
+            }
             break;
           } else {
             let valueToSet = matcher.combiner
@@ -513,17 +564,22 @@
               : profileData[matcher.keys[0]];
             // For radio buttons, we are looping through ALL radios. If the combined text matches the QUESTION (e.g. veteran),
             // attemptFill will check if the specific radio's label matches the ANSWER (profileData value).
-            if (
-              valueToSet &&
-              typeof valueToSet === "string" &&
-              valueToSet.trim() !== ""
-            ) {
-              if (await attemptFill(input, valueToSet)) filledCount++;
+            if (valueToSet) {
+              if (typeof valueToSet === "string" && valueToSet.trim() !== "") {
+                const filled = await attemptFill(input, valueToSet);
+                if (filled) filledCount++;
+              } else if (typeof valueToSet === "object" && valueToSet.isCountry) {
+                const filled = await attemptFill(input, valueToSet);
+                if (filled) filledCount++;
+              }
             }
             break;
           }
         }
       }
+      
+      // Add a small delay between each successful fill to prevent UI race conditions (e.g. overlapping dropdown menus)
+      await new Promise(r => setTimeout(r, 100));
     }
     console.log(
       `JobForm AutoFill: Automatically filled ${filledCount} fields.`,
@@ -599,7 +655,7 @@
           { key: "lastName", label: "Last Name" },
           { key: "email", label: "Email" },
           { key: "phone", label: "Phone" },
-          { key: "country", label: "Country" },
+          { key: "country", label: "Country", combiner: (d) => ({ isCountry: true, name: d.country, code: d.countryCode, dialCode: d.countryDialCode }) },
           { key: "timeZone", label: "Time Zone" },
           { key: "startDate", label: "Start Date" },
           { key: "linkedin", label: "LinkedIn" },
@@ -618,13 +674,19 @@
         ];
 
         textFields.forEach((field) => {
-          const val = profileData[field.key];
-          if (!val) return;
+          const val = field.combiner ? field.combiner(profileData) : profileData[field.key];
+          
+          let displayVal = val;
+          if (val && typeof val === 'object' && val.isCountry) {
+            displayVal = val.name;
+          }
+
+          if (!displayVal) return;
 
           const row = document.createElement("div");
           row.className = "row";
           row.innerHTML = `
-            <div class="label" title="${val}"><strong>${field.label}:</strong> ${val}</div>
+            <div class="label" title="${displayVal}"><strong>${field.label}:</strong> ${displayVal}</div>
             <div class="actions">
               <button class="btn copy" title="Copy to clipboard">📋</button>
               <button class="btn fill" title="Fill into field"><svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;filter: drop-shadow(-1px -1px 0px #A6A09B);" viewBox="0 0 20 20"><path d="M592.961 603.655 466.769 729.846H288.308c0-98.561 79.9-178.461 178.461-178.461a178.46 178.46 0 0 1 126.192 52.27" style="fill:#9bff58" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M645.231 729.846H466.769l126.192-126.191a178.46 178.46 0 0 1 52.27 126.191" style="fill:#3eddff" transform="translate(-16.155 -30.897)scale(.05603)"/><path d="M288.308 729.846h356.923c0 98.562-79.9 178.462-178.462 178.462s-178.461-79.9-178.461-178.462" style="fill:#f88" transform="translate(-16.155 -30.897)scale(.05603)"/></svg></button>
@@ -633,7 +695,7 @@
 
           row.querySelector(".copy").addEventListener("click", (e) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(val);
+            navigator.clipboard.writeText(displayVal);
             const btn = e.target;
             btn.textContent = "✓";
             setTimeout(() => (btn.textContent = "📋"), 1500);
@@ -687,7 +749,8 @@
       if (
         input.type === "file" ||
         input.type === "hidden" ||
-        input.type === "submit"
+        input.type === "submit" ||
+        input.dataset.skipQuickEdit === "true"
       )
         continue;
 
@@ -733,7 +796,5 @@
     }
   } catch (error) {
     console.error("JobForm AutoFill Error:", error);
-  } finally {
-    window.hasRunAutoFill = false; // Allow re-runs if triggered manually
   }
 })();
